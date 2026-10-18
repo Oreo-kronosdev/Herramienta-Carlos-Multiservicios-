@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { comprobarCambioPropio, parseNuevoUsuario } from "@/lib/equipo";
+import { fd } from "./fd";
 
 describe("cambios sobre uno mismo", () => {
   test("el jefe no puede quitarse el rol", () => {
@@ -15,12 +16,6 @@ describe("cambios sobre uno mismo", () => {
     expect(comprobarCambioPropio("j", "a", { activo: false })).toBeNull();
   });
 });
-
-function fd(campos: Record<string, string>) {
-  const f = new FormData();
-  for (const [k, v] of Object.entries(campos)) f.set(k, v);
-  return f;
-}
 
 describe("alta de usuario", () => {
   test("normaliza el usuario y acepta datos válidos", () => {

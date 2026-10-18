@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireJefe } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Cabecera } from "@/components/Cabecera";
+import { Fresco } from "@/components/Fresco";
 import { Cargando } from "@/components/Cargando";
 import { EditarUsuarioForm, PasswordForm } from "./Formularios";
 
@@ -31,10 +32,12 @@ async function Usuario({ params }: { params: Promise<{ id: string }> }) {
     <>
       <Cabecera titulo={u.nombre} volver={{ href: "/equipo", texto: "Equipo" }} />
       <p className="-mt-3 mb-5 text-muted">@{u.username}{u.id === jefe.id ? " · eres tú" : ""}</p>
-      <div className="space-y-6">
-        <EditarUsuarioForm usuario={u} />
-        <PasswordForm id={u.id} />
-      </div>
+      <Fresco>
+        <div className="space-y-6">
+          <EditarUsuarioForm usuario={u} />
+          <PasswordForm id={u.id} />
+        </div>
+      </Fresco>
     </>
   );
 }

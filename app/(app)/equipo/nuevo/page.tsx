@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { requireJefe } from "@/lib/auth";
 import { Cabecera } from "@/components/Cabecera";
+import { Fresco } from "@/components/Fresco";
 import { Cargando } from "@/components/Cargando";
 import { NuevoUsuarioForm } from "./NuevoUsuarioForm";
 
@@ -19,5 +20,9 @@ export default function NuevoUsuarioPage() {
 
 async function Formulario() {
   await requireJefe();
-  return <NuevoUsuarioForm />;
+  return (
+    <Fresco>
+      <NuevoUsuarioForm />
+    </Fresco>
+  );
 }

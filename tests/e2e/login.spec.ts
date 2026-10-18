@@ -21,9 +21,9 @@ test("el usuario no distingue mayúsculas ni espacios", async ({ page }) => {
 
 test("contraseña incorrecta muestra error y no entra", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("Usuario").fill("carlos");
-  await page.getByLabel("Contraseña").fill("mala-clave");
+  await page.getByLabel("Usuario").filter({ visible: true }).fill("carlos");
+  await page.getByLabel("Contraseña").filter({ visible: true }).fill("mala-clave");
   await page.getByRole("button", { name: "Entrar" }).click();
-  await expect(page.getByText("Usuario o contraseña incorrectos")).toBeVisible();
+  await expect(page.getByText("Usuario o contraseña incorrectos").filter({ visible: true })).toBeVisible();
   await expect(page).toHaveURL(/\/login/);
 });
