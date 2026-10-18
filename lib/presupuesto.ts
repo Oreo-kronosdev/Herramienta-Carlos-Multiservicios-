@@ -16,3 +16,6 @@ export function parseLinea(fd: FormData, campoTexto: "concepto" | "material"): R
   if (Object.keys(errores).length) return { ok: false, errores };
   return { ok: true, data: { texto, cantidad: n as number, unidad: unidad as Unidad } };
 }
+
+const NUM = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 });
+export const formatCantidad = (n: number) => NUM.format(n);

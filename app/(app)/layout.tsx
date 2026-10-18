@@ -16,7 +16,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
   const perfil = await requireUser();
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-20 bg-ink pt-[env(safe-area-inset-top)] text-white">
+      <header className="sticky top-0 z-20 bg-ink pt-[env(safe-area-inset-top)] text-white print:hidden">
         <div className="mx-auto flex h-(--header-h) max-w-2xl items-center justify-between px-4">
           <span className="font-display text-lg font-bold tracking-wide">
             Multiservicios
@@ -27,7 +27,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-[calc(var(--nav-h)+env(safe-area-inset-bottom)+1.5rem)]">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-[calc(var(--nav-h)+env(safe-area-inset-bottom)+1.5rem)] print:max-w-none print:p-0">
         {children}
       </main>
       <BottomNav esJefe={perfil.rol === "jefe"} />

@@ -1,6 +1,6 @@
 # Carlos Multiservicios — herramienta interna
 
-App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil, tareas por persona, checklist de material por obra y finanzas con exportación a Excel. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
+App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil, tareas por persona, checklist de material por obra, finanzas con exportación a Excel y toma de datos para presupuestos con fotos. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
 
 **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Supabase (Auth + Postgres con Row Level Security).
 
@@ -15,6 +15,7 @@ App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, client
 | Tareas | crear, asignar, editar y borrar | ver las suyas y marcarlas como hechas |
 | Material y herramientas (en cada obra) | apuntar y quitar | marcar lo preparado y «Desmarcar todo» en sus obras |
 | Finanzas (ingresos, gastos, facturas, Excel) | todo | — |
+| Toma de datos para presupuesto (medidas, materiales, fotos) | todas, en cualquier obra | en sus obras: crear, rellenar e imprimir |
 | Avisos en el móvil | sí | sí |
 
 La base de datos impone estos permisos (RLS), no solo las pantallas.
@@ -27,7 +28,7 @@ Requisitos: Node 20 o superior y Docker.
 
 ```bash
 npm install
-npx supabase start          # levanta Postgres y Auth en Docker
+npx supabase start          # levanta Postgres, Auth y Storage en Docker
 cp .env.example .env.local  # y rellena con los valores de `npx supabase status`
 npx supabase db reset       # crea las tablas y carga datos de prueba
 npm run dev                 # http://localhost:3000
@@ -119,6 +120,17 @@ Solo las ve el jefe: pestaña **Más → Finanzas**.
 - **Excel:** «Exportar mes a Excel» o «Exportar año a Excel» descarga un `.xlsx` con tres hojas (Resumen, Movimientos y Facturas). En Movimientos los gastos van en negativo, así la suma es el balance.
 
 Sin IVA desglosado: cada factura y movimiento lleva un único importe.
+
+## Toma de datos para presupuesto
+
+En la ficha de cada obra → **Presupuestos (toma de datos)** → «Nueva toma de datos». Desde el móvil, en la obra:
+
+- **Medidas** y **Materiales**: qué, cantidad («12,5») y unidad (m, m², m³, ml, ud, kg, l).
+- **Fotos**: «Añadir fotos» abre la cámara o la galería. Se reducen en el móvil (lado mayor 1600 px) para gastar pocos datos. Máximo 20 por toma de datos.
+- **Observaciones**: lo que haga falta saber para presupuestar.
+- **Ver para imprimir** → «Imprimir / Guardar PDF» genera un documento A4 con la cabecera de la empresa.
+
+Las fotos se guardan en Supabase Storage, en un bucket **privado** (`presupuestos`) que crea la migración. Solo las ven el jefe y quien trabaja en esa obra. No hace falta configurar nada más en la nube: `npx supabase db push` crea el bucket y sus permisos.
 
 ## Avisos en el móvil
 
