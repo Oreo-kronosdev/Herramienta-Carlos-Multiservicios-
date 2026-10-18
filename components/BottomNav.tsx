@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const ICONOS = {
   inicio: "M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5",
   obras: "M4 20V9l8-5 8 5v11M9 20v-6h6v6",
+  agenda: "M7 3v3M17 3v3M4 8h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1M8 12h2M8 16h2M14 12h2",
   clientes: "M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 19v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.15a3.5 3.5 0 0 1 0 6.7",
   equipo: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M5 20a7 7 0 0 1 14 0",
 } as const;
@@ -13,6 +14,7 @@ const ICONOS = {
 const ENLACES = [
   { href: "/", texto: "Inicio", icono: "inicio" },
   { href: "/obras", texto: "Obras", icono: "obras" },
+  { href: "/agenda", texto: "Agenda", icono: "agenda" },
   { href: "/clientes", texto: "Clientes", icono: "clientes" },
   { href: "/equipo", texto: "Equipo", icono: "equipo", soloJefe: true },
 ] as const;
