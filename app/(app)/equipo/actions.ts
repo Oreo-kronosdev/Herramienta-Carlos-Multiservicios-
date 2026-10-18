@@ -54,18 +54,15 @@ export async function actualizarUsuario(_prev: FormState, fd: FormData): Promise
   if (propio) return { error: propio };
 
   const admin = createAdminClient();
-  const { data: antes } = await admin.from("profiles").select("activo").eq("id", id).maybeSingle();
-  if (!antes) return { error: "Usuario no encontrado" };
-
-  const { error } = await admin.from("profiles").update({ nombre, rol, activo }).eq("id", id);
+  const { data, error } = await admin.from("profiles").update({ nombre, rol, activo }).eq("id", id).select("id");
   if (error) return { error: "No se pudieron guardar los cambios" };
+  if (!data.length) return { error: "Usuario no encontrado" };
 
-  if (antes.activo !== activo) {
-    const { error: errBan } = await admin.auth.admin.updateUserById(id, {
-      ban_duration: activo ? "none" : BANEO_INDEFINIDO,
-    });
-    if (errBan) return { error: "Se guardó el perfil, pero no se pudo bloquear/desbloquear el acceso. Repite." };
-  }
+  // Siempre, no solo si cambia: así «Repite» completa un bloqueo que falló a medias.
+  const { error: errBan } = await admin.auth.admin.updateUserById(id, {
+    ban_duration: activo ? "none" : BANEO_INDEFINIDO,
+  });
+  if (errBan) return { error: "Se guardó el perfil, pero no se pudo bloquear/desbloquear el acceso. Repite." };
 
   revalidatePath("/equipo");
   return { ok: "Cambios guardados" };

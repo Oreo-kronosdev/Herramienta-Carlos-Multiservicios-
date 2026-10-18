@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { entrar, salir, USUARIOS } from "./helpers";
+import { createClient } from "@supabase/supabase-js";
+import { crearTrabajador, entrar, salir, USUARIOS } from "./helpers";
 
 // Nombre único por ejecución para no depender de reiniciar la base de datos.
 const nuevo = `luis${Date.now().toString().slice(-6)}`;
@@ -91,4 +92,22 @@ test("el jefe cambia la contraseña de un trabajador", async ({ page }) => {
   await page.getByLabel("Nueva contraseña").filter({ visible: true }).fill(USUARIOS.ana);
   await page.getByRole("button", { name: "Cambiar contraseña" }).click();
   await expect(page.getByText("Contraseña cambiada").filter({ visible: true })).toBeVisible();
+});
+
+test("si el bloqueo quedó a medias, volver a guardar lo completa", async ({ page }) => {
+  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
+  // Simula un fallo anterior: perfil desactivado pero acceso en Auth sin bloquear
+  const t = await crearTrabajador("medias");
+  await admin.from("profiles").update({ activo: false }).eq("id", t.id);
+
+  await entrar(page, "carlos", USUARIOS.carlos);
+  await page.goto(`/equipo/${t.id}`);
+  await expect(page.getByLabel("Activo").filter({ visible: true })).not.toBeChecked();
+  await page.getByRole("button", { name: "Guardar cambios" }).click();
+  await expect(page.getByText("Cambios guardados").filter({ visible: true })).toBeVisible();
+
+  const { data } = await admin.auth.admin.getUserById(t.id);
+  expect(new Date(data.user!.banned_until ?? 0).getTime()).toBeGreaterThan(Date.now());
 });
