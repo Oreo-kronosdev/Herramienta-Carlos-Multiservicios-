@@ -130,3 +130,20 @@ test("un trabajador no entra en finanzas ni descarga el Excel", async ({ page })
   const r = await page.request.get("/finanzas/exportar", { maxRedirects: 0 });
   expect(r.status()).not.toBe(200);
 });
+
+test("el Excel de un mes sin movimientos no tiene fórmulas circulares y el pendiente cuadra con la pantalla", async ({ page }) => {
+  await entrar(page, "carlos", USUARIOS.carlos);
+  await page.goto("/finanzas");
+  const { pendiente } = await totales(page);
+  const r = await page.request.get("/finanzas/exportar?mes=2020-01");
+  expect(r.status()).toBe(200);
+  const libro = new ExcelJS.Workbook();
+  await libro.xlsx.load((await r.body()) as unknown as ArrayBuffer);
+  const movs = libro.getWorksheet("Movimientos")!;
+  const total = movs.getRow(movs.rowCount).getCell(5).value;
+  const formula = typeof total === "object" && total && "formula" in total ? String(total.formula) : "";
+  const ultimaReferida = Number(formula.match(/E(\d+)\)?$/)?.[1] ?? 0);
+  expect(ultimaReferida).toBeLessThan(movs.rowCount); // nunca se suma a sí misma
+  const resumenPendiente = libro.getWorksheet("Resumen")!.getCell("B5").value;
+  expect(Math.round(Number(resumenPendiente) * 100)).toBe(Math.round(pendiente * 100));
+});

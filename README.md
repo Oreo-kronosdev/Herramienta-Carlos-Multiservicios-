@@ -1,6 +1,6 @@
 # Carlos Multiservicios — herramienta interna
 
-App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil tareas por persona, checklist de material por obra y finanzas con exportación a Excel. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
+App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil, tareas por persona, checklist de material por obra y finanzas con exportación a Excel. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
 
 **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Supabase (Auth + Postgres con Row Level Security).
 

@@ -60,7 +60,9 @@ begin
   if not found then
     raise exception 'Factura no encontrada';
   end if;
-  if p_pagada then
+  if p_pagada and f.pagada then
+    return; -- ya cobrada (doble pulsación u otra pestaña): no se cambia la fecha ni el ingreso
+  elsif p_pagada then
     update public.facturas set pagada = true, pagada_en = coalesce(p_fecha, pagada_en, current_date) where id = p_factura;
     insert into public.movimientos (tipo, concepto, importe, fecha, obra_id, factura_id)
     values ('ingreso', 'Factura ' || f.numero || ' · ' || f.cliente, f.importe, coalesce(p_fecha, current_date), f.obra_id, p_factura)

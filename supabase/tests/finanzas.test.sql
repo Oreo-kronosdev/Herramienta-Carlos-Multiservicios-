@@ -1,7 +1,7 @@
 -- RLS y cobro de facturas (solo el jefe).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(18);
 
 insert into auth.users (id, email, aud, role) values
   ('15000000-0000-0000-0000-000000000001', 't6-j@usuarios.local', 'authenticated', 'authenticated'),
@@ -37,10 +37,14 @@ select is((select count(*) from t_ingresos), 1::bigint, 'se crea un ingreso');
 select is((select importe || '|' || fecha || '|' || tipo from t_ingresos), '1210.00|2030-03-10|ingreso', 'con importe, fecha y tipo');
 select lives_ok($$select public.marcar_factura('45000000-0000-0000-0000-000000000001', true, '2030-03-11')$$, 'cobrarla otra vez no falla');
 select is((select count(*) from t_ingresos), 1::bigint, 'y no duplica el ingreso');
+select is((select pagada_en from public.facturas where id = '45000000-0000-0000-0000-000000000001'), '2030-03-10'::date,
+  'cobrarla otra vez no cambia la fecha de cobro');
+select is((select fecha from t_ingresos), '2030-03-10'::date, 'y el ingreso sigue con la misma fecha');
 update public.facturas set importe = 1500 where id = '45000000-0000-0000-0000-000000000001';
 select is((select importe from t_ingresos), 1500.00::numeric, 'cambiar el importe actualiza el ingreso');
 select lives_ok($$select public.marcar_factura('45000000-0000-0000-0000-000000000001', false, null)$$, 'J la desmarca');
 select is((select count(*) from t_ingresos), 0::bigint, 'el ingreso desaparece');
+select is((select pagada_en from public.facturas where id = '45000000-0000-0000-0000-000000000001'), null::date, 'sin fecha de cobro');
 
 -- Borrar la obra conserva factura y movimiento sin obra
 delete from public.obras where id = '35000000-0000-0000-0000-000000000001';
@@ -49,6 +53,9 @@ select is((select count(*) from public.facturas where id = '45000000-0000-0000-0
   2::bigint, 'borrar la obra conserva factura y gasto sin obra');
 select throws_ok($$delete from public.clientes where id = '25000000-0000-0000-0000-000000000001'$$,
   '23503', null, 'un cliente con facturas no se borra');
+
+set local role anon;
+select throws_ok($$select count(*) from public.facturas$$, '42501', null, 'anon no accede');
 
 select * from finish();
 rollback;

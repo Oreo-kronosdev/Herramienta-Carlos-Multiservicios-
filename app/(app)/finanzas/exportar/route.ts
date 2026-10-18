@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         })();
 
   const supabase = await createClient();
-  const [{ data: movs, error: e1 }, { data: facturas, error: e2 }] = await Promise.all([
+  const [{ data: movs, error: e1 }, { data: facturas, error: e2 }, { data: sinCobrar, error: e3 }] = await Promise.all([
     supabase
       .from("movimientos")
       .select("tipo, concepto, importe, fecha, obras (titulo)")
@@ -36,17 +36,19 @@ export async function GET(request: NextRequest) {
       .select("numero, concepto, importe, fecha_emision, fecha_vencimiento, pagada, pagada_en, clientes (nombre), obras (titulo)")
       .or(`and(fecha_emision.gte.${periodo.desde},fecha_emision.lte.${periodo.hasta}),and(pagada.eq.false,fecha_emision.lt.${periodo.desde})`)
       .order("fecha_emision"),
+    // Igual que en pantalla: todo lo que hoy está sin cobrar
+    supabase.from("facturas").select("importe").eq("pagada", false),
   ]);
-  if (e1 || e2) return NextResponse.json({ error: "No se pudieron leer los datos" }, { status: 500 });
+  if (e1 || e2 || e3) return NextResponse.json({ error: "No se pudieron leer los datos" }, { status: 500 });
 
   const r = resumen(movs);
-  const pendiente = resumen(facturas.filter((f) => !f.pagada).map((f) => ({ tipo: "ingreso" as const, importe: f.importe }))).ingresos;
+  const pendiente = resumen(sinCobrar.map((f) => ({ tipo: "ingreso" as const, importe: f.importe }))).ingresos;
   const libro = new ExcelJS.Workbook();
   libro.creator = "Carlos Multiservicios";
 
   const hResumen = libro.addWorksheet("Resumen");
   hResumen.columns = [{ width: 28 }, { width: 18 }];
-  hResumen.addRows([["Periodo", periodo.nombre], ["Ingresos", r.ingresos], ["Gastos", r.gastos], ["Balance", r.balance], ["Pendiente de cobro", pendiente]]);
+  hResumen.addRows([["Periodo", periodo.nombre], ["Ingresos", r.ingresos], ["Gastos", r.gastos], ["Balance", r.balance], ["Pendiente de cobro (hoy)", pendiente]]);
   for (let i = 2; i <= 5; i++) hResumen.getCell(`B${i}`).numFmt = EUR;
   hResumen.getColumn(1).font = { bold: true };
 
@@ -63,7 +65,8 @@ export async function GET(request: NextRequest) {
     hMovs.addRow([fecha(m.fecha), TIPOS_MOVIMIENTO[m.tipo], m.concepto, m.obras?.titulo ?? "", m.tipo === "gasto" ? -m.importe : Number(m.importe)]);
   }
   const ultima = hMovs.rowCount;
-  const total = hMovs.addRow(["", "", "Total (balance)", "", { formula: `SUM(E2:E${Math.max(ultima, 2)})`, result: r.balance }]);
+  // Sin movimientos no hay nada que sumar (y SUM(E2:E2) en la fila 2 sería circular)
+  const total = hMovs.addRow(["", "", "Total (balance)", "", ultima >= 2 ? { formula: `SUM(E2:E${ultima})`, result: r.balance } : 0]);
   total.font = { bold: true };
 
   const hFact = libro.addWorksheet("Facturas");
