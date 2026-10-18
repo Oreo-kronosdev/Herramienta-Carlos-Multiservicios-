@@ -42,3 +42,6 @@ export const TIPOS_CHECKLIST: Record<TipoChecklist, string> = { material: "Mater
 
 export type TipoMovimiento = Database["public"]["Enums"]["tipo_movimiento"];
 export const TIPOS_MOVIMIENTO: Record<TipoMovimiento, string> = { ingreso: "Ingreso", gasto: "Gasto" };
+
+export type Unidad = Database["public"]["Enums"]["unidad_medida"];
+export const UNIDADES: Record<Unidad, string> = { m: "m", m2: "m²", m3: "m³", ml: "ml", ud: "ud", kg: "kg", l: "l" };
