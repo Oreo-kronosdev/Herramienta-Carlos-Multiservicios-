@@ -9,12 +9,15 @@ export type Profile = { id: string; username: string; nombre: string; rol: Rol; 
 // Una lectura por petición aunque la pidan varios componentes.
 export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return null;
+  // getClaims verifica la firma del token sin preguntar a Auth; así un usuario bloqueado
+  // sigue llegando a su perfil y ve "desactivado" en lugar de un login sin explicación.
+  const { data: auth } = await supabase.auth.getClaims();
+  const userId = auth?.claims?.sub;
+  if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
     .select("id, username, nombre, rol, activo")
-    .eq("id", auth.user.id)
+    .eq("id", userId)
     .maybeSingle();
   return data;
 });
