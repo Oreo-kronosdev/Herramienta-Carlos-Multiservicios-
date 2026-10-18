@@ -7,7 +7,7 @@ import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Aviso } from "@/components/Aviso";
 import { createClient } from "@/lib/supabase/client";
-import { comprimirFoto, validarFoto } from "@/lib/imagen";
+import { comprimirFoto, FotoIlegible, validarFoto } from "@/lib/imagen";
 import { UNIDADES } from "@/lib/etiquetas";
 import type { FormState } from "@/app/(app)/equipo/actions";
 import {
@@ -126,7 +126,11 @@ export function SubirFotos({ presupuestoId, quedan }: { presupuestoId: string; q
         const r = await registrarFoto(presupuestoId, path);
         if (r.error) throw new Error(r.error);
       } catch (e) {
-        setError(e instanceof Error && e.message.startsWith("Máximo") ? e.message : `No se pudo subir «${file.name}». Comprueba la conexión.`);
+        setError(
+          e instanceof FotoIlegible || (e instanceof Error && e.message.startsWith("Máximo"))
+            ? e.message
+            : `No se pudo subir «${file.name}». Comprueba la conexión.`,
+        );
         break;
       }
     }

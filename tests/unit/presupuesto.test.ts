@@ -21,10 +21,14 @@ describe("líneas de medidas y materiales", () => {
 });
 
 describe("fotos", () => {
-  test("solo imágenes de hasta 10 MB", () => {
+  test("solo imágenes; las de móviles de 50–200 MP (15–35 MB) se aceptan porque se comprimen", () => {
     expect(validarFoto({ type: "image/jpeg", size: 3_000_000 })).toBeNull();
+    expect(validarFoto({ type: "image/jpeg", size: 30 * 1024 * 1024 })).toBeNull();
     expect(validarFoto({ type: "text/plain", size: 10 })).toBe("Solo se pueden subir fotos");
-    expect(validarFoto({ type: "image/heic", size: 11 * 1024 * 1024 })).toBe("La foto es demasiado grande (máx. 10 MB)");
+    expect(validarFoto({ type: "image/jpeg", size: 41 * 1024 * 1024 })).toBe("La foto es demasiado grande (máx. 40 MB)");
+  });
+  test("algunos móviles entregan la foto sin tipo: se intenta igualmente", () => {
+    expect(validarFoto({ type: "", size: 2_000_000 })).toBeNull();
   });
   test("se reduce el lado mayor a 1600 px manteniendo la proporción", () => {
     expect(medidasReducidas(4000, 3000)).toEqual({ ancho: 1600, alto: 1200 });

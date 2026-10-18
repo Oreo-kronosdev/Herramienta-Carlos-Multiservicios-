@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { parseLinea } from "@/lib/presupuesto";
 import type { FormState } from "@/app/(app)/equipo/actions";
+import { borrarCarpetas } from "./archivos";
 
 // La RLS decide quién puede (jefe o quien trabaja en la obra); aquí solo se exige sesión.
 const BUCKET = "presupuestos";
@@ -67,7 +68,8 @@ export async function registrarFoto(presupuestoId: string, path: string): Promis
   const supabase = await createClient();
   const { error } = await supabase.from("presupuesto_fotos").insert({ presupuesto_id: presupuestoId, path });
   if (error) {
-    await supabase.storage.from(BUCKET).remove([path]); // no dejar archivos sueltos
+    // No dejar archivos sueltos, salvo si ya estaba registrada (no borrar una foto en uso)
+    if (error.code !== "23505") await supabase.storage.from(BUCKET).remove([path]);
     return { error: error.message.includes("Máximo 20") ? "Máximo 20 fotos por presupuesto" : "No se pudo guardar la foto" };
   }
   refrescar(presupuestoId);
@@ -102,13 +104,9 @@ export async function borrarPresupuesto(_prev: FormState, fd: FormData): Promise
   await requireUser();
   const id = String(fd.get("id") ?? "");
   const supabase = await createClient();
-  const { data: p } = await supabase.from("presupuestos").select("obra_id, presupuesto_fotos (path)").eq("id", id).maybeSingle();
+  const { data: p } = await supabase.from("presupuestos").select("obra_id").eq("id", id).maybeSingle();
   if (!p) return { error: "No encontrado" };
-  const paths = p.presupuesto_fotos.map((f) => f.path);
-  if (paths.length) {
-    const { error } = await supabase.storage.from(BUCKET).remove(paths);
-    if (error) return { error: "No se pudieron borrar las fotos. Inténtalo de nuevo." };
-  }
+  if (!(await borrarCarpetas(supabase, [id]))) return { error: "No se pudieron borrar las fotos. Inténtalo de nuevo." };
   const { error } = await supabase.from("presupuestos").delete().eq("id", id);
   if (error) return { error: "No se pudo borrar" };
   revalidatePath(`/obras/${p.obra_id}`);

@@ -35,7 +35,7 @@ create index presupuesto_materiales_presupuesto_id_idx on public.presupuesto_mat
 create table public.presupuesto_fotos (
   id uuid primary key default gen_random_uuid(),
   presupuesto_id uuid not null references public.presupuestos (id) on delete cascade,
-  path text not null unique,
+  path text not null unique check (split_part(path, '/', 1) = presupuesto_id::text),
   pie text,
   created_at timestamptz not null default now()
 );

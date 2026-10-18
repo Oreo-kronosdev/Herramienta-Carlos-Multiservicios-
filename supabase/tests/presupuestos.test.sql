@@ -1,7 +1,7 @@
 -- RLS de los documentos de presupuesto y de sus fotos en Storage.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(20);
 
 insert into auth.users (id, email, aud, role) values
   ('16000000-0000-0000-0000-000000000001', 't7-j@usuarios.local', 'authenticated', 'authenticated'),
@@ -62,6 +62,15 @@ select is((select count(*) from t_obj where name like '46000000-0000-0000-0000-0
   'A no ve fotos de uno ajeno');
 select is((select count(*) from t_obj where name like '46000000-0000-0000-0000-000000000001/%'), 1::bigint,
   'A ve las fotos del suyo');
+select throws_ok($$update public.presupuestos set obra_id = '36000000-0000-0000-0000-000000000002'
+  where id = '46000000-0000-0000-0000-000000000001'$$, '42501', null, 'A no mueve un presupuesto a otra obra');
+select throws_ok($$insert into public.presupuesto_fotos (presupuesto_id, path)
+  values ('46000000-0000-0000-0000-000000000001', '46000000-0000-0000-0000-000000000002/robada.jpg')$$,
+  '23514', null, 'la ruta de la foto tiene que ser de su presupuesto');
+update storage.objects set name = '46000000-0000-0000-0000-000000000001/movida.jpg'
+  where name = '46000000-0000-0000-0000-000000000002/ajena.jpg';
+select is((select count(*) from t_obj where name = '46000000-0000-0000-0000-000000000001/movida.jpg'),
+  0::bigint, 'A no puede mover fotos ajenas a su presupuesto');
 
 -- ===== A desactivado =====
 reset role;

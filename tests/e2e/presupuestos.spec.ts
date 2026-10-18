@@ -94,3 +94,86 @@ test("Carlos lo ve en la obra y lo borra con sus fotos", async ({ page }) => {
   const { data } = await (await admin()).storage.from("presupuestos").list(url.split("/").pop()!);
   expect(data).toEqual([]);
 });
+
+test.describe("limpieza de fotos", () => {
+  const jpeg = () => sharp({ create: { width: 400, height: 300, channels: 3, background: "#888" } }).jpeg().toBuffer();
+
+  async function obraConPresupuesto() {
+    const db = await admin();
+    const { data: obra } = await db
+      .from("obras")
+      .insert({ cliente_id: "b0000000-0000-0000-0000-000000000002", titulo: `Obra para borrar ${Date.now()}`, direccion: "C/ X", tipo_trabajo: "otro" })
+      .select("id")
+      .single();
+    const { data: p } = await db.from("presupuestos").insert({ obra_id: obra!.id }).select("id").single();
+    const conFila = `${p!.id}/con-fila.jpg`;
+    const suelta = `${p!.id}/suelta.jpg`; // subida sin llegar a registrarse
+    for (const path of [conFila, suelta]) {
+      const { error } = await db.storage.from("presupuestos").upload(path, await jpeg(), { contentType: "image/jpeg" });
+      expect(error).toBeNull();
+    }
+    await db.from("presupuesto_fotos").insert({ presupuesto_id: p!.id, path: conFila });
+    return { db, obraId: obra!.id, presupuestoId: p!.id };
+  }
+
+  test("borrar una toma de datos borra también fotos que no llegaron a registrarse", async ({ page }) => {
+    const { db, obraId, presupuestoId } = await obraConPresupuesto();
+    await entrar(page, "carlos", USUARIOS.carlos);
+    await page.goto(`/presupuestos/${presupuestoId}`);
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Borrar toma de datos" }).click();
+    await expect(page).toHaveURL(new RegExp(`/obras/${obraId}$`));
+    expect((await db.storage.from("presupuestos").list(presupuestoId)).data).toEqual([]);
+    await db.from("obras").delete().eq("id", obraId);
+  });
+
+  test("borrar una obra borra las fotos de sus tomas de datos", async ({ page }) => {
+    const { db, obraId, presupuestoId } = await obraConPresupuesto();
+    await entrar(page, "carlos", USUARIOS.carlos);
+    await page.goto(`/obras/${obraId}/editar`);
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Borrar obra" }).click();
+    await expect(page).toHaveURL(/\/obras$/);
+    expect((await db.storage.from("presupuestos").list(presupuestoId)).data).toEqual([]);
+  });
+
+  test("«Quitar» una foto borra su archivo", async ({ page }) => {
+    const { db, obraId, presupuestoId } = await obraConPresupuesto();
+    await entrar(page, "carlos", USUARIOS.carlos);
+    await page.goto(`/presupuestos/${presupuestoId}`);
+    page.once("dialog", (d) => d.accept());
+    await seccion(page, "Fotos").getByRole("button", { name: "Quitar" }).click();
+    await expect(seccion(page, "Fotos").getByLabel("Pie de foto")).toHaveCount(0);
+    const nombres = ((await db.storage.from("presupuestos").list(presupuestoId)).data ?? []).map((o) => o.name);
+    expect(nombres).not.toContain("con-fila.jpg");
+    await db.storage.from("presupuestos").remove(nombres.map((n) => `${presupuestoId}/${n}`));
+    await db.from("obras").delete().eq("id", obraId);
+  });
+
+  test("el almacén rechaza archivos que no son imágenes", async () => {
+    const db = await admin();
+    const { error } = await db.storage
+      .from("presupuestos")
+      .upload("a1000000-0000-0000-0000-000000000001/nota.txt", Buffer.from("hola"), { contentType: "text/plain" });
+    expect(error).not.toBeNull();
+  });
+});
+
+test("Ana no puede borrar por la API las fotos de una obra que no es suya", async () => {
+  const db = await admin();
+  const path = `a1000000-0000-0000-0000-000000000001/no-tocar-${Date.now()}.jpg`;
+  const jpg = await sharp({ create: { width: 10, height: 10, channels: 3, background: "#000" } }).jpeg().toBuffer();
+  await db.storage.from("presupuestos").upload(path, jpg, { contentType: "image/jpeg" });
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const ana = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false },
+    });
+    await ana.auth.signInWithPassword({ email: "ana@usuarios.local", password: USUARIOS.ana });
+    await ana.storage.from("presupuestos").remove([path]);
+    const { data } = await db.storage.from("presupuestos").list("a1000000-0000-0000-0000-000000000001");
+    expect((data ?? []).map((o) => o.name)).toContain(path.split("/")[1]);
+  } finally {
+    await db.storage.from("presupuestos").remove([path]);
+  }
+});
