@@ -14,6 +14,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { hoyMadrid } from "@/lib/fechas";
 import { ListaTareas } from "../../tareas/ListaTareas";
 import { Checklist } from "../checklist/Checklist";
+import { NuevoPresupuesto } from "../../presupuestos/Editor";
+import { formatFecha as fechaCorta } from "@/lib/fechas";
 
 export const metadata = { title: "Obra" };
 
@@ -112,6 +114,16 @@ async function Obra({ params }: { params: Promise<{ id: string }> }) {
           </div>
           <TareasObra obraId={o.id} esJefe={esJefe} />
         </section>
+
+        <section aria-labelledby="presupuestos-titulo">
+          <h2 id="presupuestos-titulo" className="mb-3 font-display text-xl font-bold">
+            Presupuestos (toma de datos)
+          </h2>
+          <PresupuestosObra obraId={o.id} />
+          <div className="mt-3">
+            <NuevoPresupuesto obraId={o.id} />
+          </div>
+        </section>
       </div>
     </>
   );
@@ -150,5 +162,29 @@ async function TareasObra({ obraId, esJefe }: { obraId: string; esJefe: boolean 
     <ListaTareas tareas={tareas} hoy={hoyMadrid()} esJefe={esJefe} />
   ) : (
     <EmptyState titulo="Sin tareas pendientes" />
+  );
+}
+
+async function PresupuestosObra({ obraId }: { obraId: string }) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("presupuestos")
+    .select("id, titulo, created_at, profiles (nombre)")
+    .eq("obra_id", obraId)
+    .order("created_at", { ascending: false });
+  if (!data?.length) return <EmptyState titulo="Sin tomas de datos" />;
+  return (
+    <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
+      {data.map((p) => (
+        <li key={p.id}>
+          <Link href={`/presupuestos/${p.id}`} className="block min-h-16 px-4 py-3 active:bg-bg">
+            <span className="block font-semibold break-words">{p.titulo}</span>
+            <span className="block text-[15px] text-muted first-letter:uppercase">
+              {[fechaCorta(p.created_at.slice(0, 10)), p.profiles?.nombre].filter(Boolean).join(" · ")}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }

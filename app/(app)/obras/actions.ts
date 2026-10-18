@@ -6,6 +6,7 @@ import { requireJefe, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { esEstado, parseObra } from "@/lib/obra";
 import type { FormState } from "@/app/(app)/equipo/actions";
+import { borrarCarpetas } from "@/app/(app)/presupuestos/archivos";
 
 export async function guardarObra(_prev: FormState, fd: FormData): Promise<FormState> {
   await requireJefe();
@@ -52,6 +53,10 @@ export async function borrarObra(_prev: FormState, fd: FormData): Promise<FormSt
   await requireJefe();
   const id = String(fd.get("id") ?? "");
   const supabase = await createClient();
+  // Las fotos de sus tomas de datos se borran antes: la base de datos no puede borrar archivos
+  const { data: presupuestos } = await supabase.from("presupuestos").select("id").eq("obra_id", id);
+  if (!(await borrarCarpetas(supabase, (presupuestos ?? []).map((p) => p.id))))
+    return { error: "No se pudieron borrar las fotos de la obra. Inténtalo de nuevo." };
   const { error } = await supabase.from("obras").delete().eq("id", id);
   if (error) return { error: "No se pudo borrar la obra" };
   revalidatePath("/obras");

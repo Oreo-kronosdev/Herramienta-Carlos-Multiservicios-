@@ -29,7 +29,7 @@ export function BottomNav({ esJefe }: { esJefe: boolean }) {
   return (
     <nav
       aria-label="Principal"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur print:hidden"
     >
       <ul className="mx-auto flex h-(--nav-h) max-w-2xl">
         {ENLACES.filter((e) => esJefe || !("soloJefe" in e)).map((e) => (

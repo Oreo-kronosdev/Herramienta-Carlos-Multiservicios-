@@ -11,6 +11,8 @@ const RUTAS_JEFE = [
   "/agenda/d0000000-0000-0000-0000-000000000001",
   "/tareas",
   "/tareas/nueva",
+  "/presupuestos/a1000000-0000-0000-0000-000000000001",
+  "/presupuestos/a1000000-0000-0000-0000-000000000001/imprimir",
   "/clientes",
   "/clientes/nuevo",
   "/clientes/b0000000-0000-0000-0000-000000000001",
@@ -54,7 +56,7 @@ test("trabajador: navegación sin Equipo", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "Agenda" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Equipo" })).toHaveCount(0);
   await expect(nav.getByRole("link", { name: "Más" })).toHaveCount(0);
-  for (const ruta of ["/", "/obras", "/agenda", "/tareas", "/clientes", "/obras/c0000000-0000-0000-0000-000000000001"]) await revisarPantalla(page, ruta);
+  for (const ruta of ["/", "/obras", "/agenda", "/tareas", "/clientes", "/presupuestos/a1000000-0000-0000-0000-000000000001", "/obras/c0000000-0000-0000-0000-000000000001"]) await revisarPantalla(page, ruta);
 });
 
 test("todos los estilos :hover están protegidos para pantallas táctiles", async ({ page }) => {

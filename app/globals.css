@@ -87,3 +87,14 @@ label:has(input[type="checkbox"]) {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff;
+  }
+}

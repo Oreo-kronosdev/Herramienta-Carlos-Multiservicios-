@@ -70,3 +70,13 @@ insert into public.movimientos (tipo, concepto, importe, fecha, obra_id, factura
   ('gasto', 'Tubos de canalón', 86.40, date_trunc('month', current_date)::date + 2, 'c0000000-0000-0000-0000-000000000001', null),
   ('gasto', 'Gasolina furgoneta', 60, current_date, null, null),
   ('ingreso', 'Pago en mano revisión', 120, current_date, null, null);
+
+-- Toma de datos de ejemplo en la obra de canalones
+insert into public.presupuestos (id, obra_id, autor_id, titulo, observaciones) values
+  ('a1000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'Cambio de bajantes', 'Dos bajantes con fisuras en la fachada norte.');
+insert into public.presupuesto_medidas (presupuesto_id, concepto, cantidad, unidad) values
+  ('a1000000-0000-0000-0000-000000000001', 'Bajante fachada norte', 9, 'ml'),
+  ('a1000000-0000-0000-0000-000000000001', 'Canalón alero', 14.5, 'ml');
+insert into public.presupuesto_materiales (presupuesto_id, material, cantidad, unidad) values
+  ('a1000000-0000-0000-0000-000000000001', 'Tubo PVC 100 mm', 10, 'ml'),
+  ('a1000000-0000-0000-0000-000000000001', 'Abrazaderas', 12, 'ud');
