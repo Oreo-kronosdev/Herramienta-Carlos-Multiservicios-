@@ -201,6 +201,92 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"presupuesto_fotos": {
+                  Row: {
+                    "created_at": string,"id": string,"path": string,"pie": string | null,"presupuesto_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"path": string,"pie"?: string | null,"presupuesto_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"path"?: string,"pie"?: string | null,"presupuesto_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "presupuesto_fotos_presupuesto_id_fkey"
+      columns: ["presupuesto_id"]
+isOneToOne: false
+      referencedRelation: "presupuestos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"presupuesto_materiales": {
+                  Row: {
+                    "cantidad": number,"created_at": string,"id": string,"material": string,"presupuesto_id": string,"unidad": Database["public"]['Enums']["unidad_medida"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cantidad": number,"created_at"?: string,"id"?: string,"material": string,"presupuesto_id": string,"unidad": Database["public"]['Enums']["unidad_medida"]
+                  }
+                  Update: {
+                    "cantidad"?: number,"created_at"?: string,"id"?: string,"material"?: string,"presupuesto_id"?: string,"unidad"?: Database["public"]['Enums']["unidad_medida"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "presupuesto_materiales_presupuesto_id_fkey"
+      columns: ["presupuesto_id"]
+isOneToOne: false
+      referencedRelation: "presupuestos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"presupuesto_medidas": {
+                  Row: {
+                    "cantidad": number,"concepto": string,"created_at": string,"id": string,"presupuesto_id": string,"unidad": Database["public"]['Enums']["unidad_medida"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cantidad": number,"concepto": string,"created_at"?: string,"id"?: string,"presupuesto_id": string,"unidad": Database["public"]['Enums']["unidad_medida"]
+                  }
+                  Update: {
+                    "cantidad"?: number,"concepto"?: string,"created_at"?: string,"id"?: string,"presupuesto_id"?: string,"unidad"?: Database["public"]['Enums']["unidad_medida"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "presupuesto_medidas_presupuesto_id_fkey"
+      columns: ["presupuesto_id"]
+isOneToOne: false
+      referencedRelation: "presupuestos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"presupuestos": {
+                  Row: {
+                    "autor_id": string | null,"created_at": string,"id": string,"obra_id": string,"observaciones": string | null,"titulo": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "autor_id"?: string | null,"created_at"?: string,"id"?: string,"obra_id": string,"observaciones"?: string | null,"titulo"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "autor_id"?: string | null,"created_at"?: string,"id"?: string,"obra_id"?: string,"observaciones"?: string | null,"titulo"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "presupuestos_autor_id_fkey"
+      columns: ["autor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "presupuestos_obra_id_fkey"
+      columns: ["obra_id"]
+isOneToOne: false
+      referencedRelation: "obras"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "activo": boolean,"created_at": string,"id": string,"nombre": string,"rol": Database["public"]['Enums']["rol_usuario"],"username": string
@@ -289,7 +375,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_checklist": "material"|"herramienta","tipo_evento": "cita"|"fecha_limite","tipo_movimiento": "ingreso"|"gasto","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
+            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_checklist": "material"|"herramienta","tipo_evento": "cita"|"fecha_limite","tipo_movimiento": "ingreso"|"gasto","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro","unidad_medida": "m"|"m2"|"m3"|"ml"|"ud"|"kg"|"l"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -409,7 +495,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_checklist": ["material", "herramienta"],"tipo_evento": ["cita", "fecha_limite"],"tipo_movimiento": ["ingreso", "gasto"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
+            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_checklist": ["material", "herramienta"],"tipo_evento": ["cita", "fecha_limite"],"tipo_movimiento": ["ingreso", "gasto"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"],"unidad_medida": ["m", "m2", "m3", "ml", "ud", "kg", "l"]
           }
         }
 } as const
