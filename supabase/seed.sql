@@ -59,3 +59,14 @@ insert into public.checklist_items (obra_id, texto, tipo) values
   ('c0000000-0000-0000-0000-000000000001', 'Guantes', 'material'),
   ('c0000000-0000-0000-0000-000000000001', 'Escalera de 7 m', 'herramienta'),
   ('c0000000-0000-0000-0000-000000000001', 'Arnés', 'herramienta');
+
+-- Finanzas (fechas del mes en curso)
+insert into public.facturas (id, numero, cliente_id, obra_id, concepto, importe, fecha_emision, fecha_vencimiento, pagada, pagada_en) values
+  ('f0000000-0000-0000-0000-000000000001', '2026-001', 'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Limpieza de canalones', 480, date_trunc('month', current_date)::date, date_trunc('month', current_date)::date + 10, false, null),
+  ('f0000000-0000-0000-0000-000000000002', '2026-002', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000003', 'Señal pintura de fachada', 1000, current_date, current_date + 30, false, null),
+  ('f0000000-0000-0000-0000-000000000003', '2026-000', 'b0000000-0000-0000-0000-000000000001', null, 'Reparación de goteras', 350, date_trunc('month', current_date)::date, null, true, date_trunc('month', current_date)::date + 1);
+insert into public.movimientos (tipo, concepto, importe, fecha, obra_id, factura_id) values
+  ('ingreso', 'Factura 2026-000 · Comunidad C/ Mayor 5', 350, date_trunc('month', current_date)::date + 1, null, 'f0000000-0000-0000-0000-000000000003'),
+  ('gasto', 'Tubos de canalón', 86.40, date_trunc('month', current_date)::date + 2, 'c0000000-0000-0000-0000-000000000001', null),
+  ('gasto', 'Gasolina furgoneta', 60, current_date, null, null),
+  ('ingreso', 'Pago en mano revisión', 120, current_date, null, null);

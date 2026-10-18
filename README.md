@@ -1,6 +1,6 @@
 # Carlos Multiservicios — herramienta interna
 
-App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil y tareas por persona. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
+App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil, tareas por persona, checklist de material por obra y finanzas con exportación a Excel. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
 
 **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Supabase (Auth + Postgres con Row Level Security).
 
@@ -14,6 +14,7 @@ App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, client
 | Agenda (citas y fechas límite) | ver, crear, editar y borrar todas | ver las que tiene asignadas |
 | Tareas | crear, asignar, editar y borrar | ver las suyas y marcarlas como hechas |
 | Material y herramientas (en cada obra) | apuntar y quitar | marcar lo preparado y «Desmarcar todo» en sus obras |
+| Finanzas (ingresos, gastos, facturas, Excel) | todo | — |
 | Avisos en el móvil | sí | sí |
 
 La base de datos impone estos permisos (RLS), no solo las pantallas.
@@ -108,6 +109,17 @@ En la ficha de cada persona el jefe puede cambiar el nombre, el rol o la contras
 
 ---
 
+## Finanzas
+
+Solo las ve el jefe: pestaña **Más → Finanzas**.
+
+- **Gastos e ingresos:** «Nuevo gasto» / «Nuevo ingreso», con obra opcional.
+- **Facturas:** «Nueva factura». Las no cobradas salen en «Facturas pendientes»; «Cobrada» la marca como pagada hoy y crea su ingreso automáticamente (desde la ficha de la factura se puede elegir otra fecha o desmarcarla).
+- **Resumen del mes:** ingresos, gastos, balance y pendiente de cobro. Con ‹ › se cambia de mes.
+- **Excel:** «Exportar mes a Excel» o «Exportar año a Excel» descarga un `.xlsx` con tres hojas (Resumen, Movimientos y Facturas). En Movimientos los gastos van en negativo, así la suma es el balance.
+
+Sin IVA desglosado: cada factura y movimiento lleva un único importe.
+
 ## Avisos en el móvil
 
 Cada cita tiene un «Avisar» (el mismo día, 1, 2, 3 o 7 días antes). Una vez al día, Vercel llama a `/api/recordatorios`, que manda una notificación a las personas asignadas.
@@ -153,7 +165,7 @@ Se abre a pantalla completa como una app. Necesita conexión a internet; no func
 ## Estructura
 
 ```
-app/(app)/        pantallas con sesión: inicio, obras, agenda, tareas, clientes, equipo
+app/(app)/        pantallas con sesión: inicio, obras, agenda, tareas, clientes, «Más» (finanzas y equipo)
 app/api/          aviso diario (lo llama Vercel Cron)
 public/sw.js      service worker: solo muestra notificaciones
 app/login/        entrada y salida

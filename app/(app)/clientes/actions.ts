@@ -28,7 +28,7 @@ export async function borrarCliente(_prev: FormState, fd: FormData): Promise<For
   const id = String(fd.get("id") ?? "");
   const supabase = await createClient();
   const { error } = await supabase.from("clientes").delete().eq("id", id);
-  if (error?.code === "23503") return { error: "No se puede borrar: tiene obras. Borra antes sus obras." };
+  if (error?.code === "23503") return { error: "No se puede borrar: tiene obras o facturas. Bórralas antes." };
   if (error) return { error: "No se pudo borrar el cliente" };
   revalidatePath("/clientes");
   redirect("/clientes");

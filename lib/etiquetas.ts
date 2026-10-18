@@ -39,3 +39,6 @@ export const AVISAR_DIAS: Record<AvisarDias, string> = {
 
 export type TipoChecklist = Database["public"]["Enums"]["tipo_checklist"];
 export const TIPOS_CHECKLIST: Record<TipoChecklist, string> = { material: "Material", herramienta: "Herramientas" };
+
+export type TipoMovimiento = Database["public"]["Enums"]["tipo_movimiento"];
+export const TIPOS_MOVIMIENTO: Record<TipoMovimiento, string> = { ingreso: "Ingreso", gasto: "Gasto" };

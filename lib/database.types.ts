@@ -103,6 +103,58 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"facturas": {
+                  Row: {
+                    "cliente_id": string,"concepto": string,"created_at": string,"fecha_emision": string,"fecha_vencimiento": string | null,"id": string,"importe": number,"numero": string,"obra_id": string | null,"pagada": boolean,"pagada_en": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cliente_id": string,"concepto": string,"created_at"?: string,"fecha_emision": string,"fecha_vencimiento"?: string | null,"id"?: string,"importe": number,"numero": string,"obra_id"?: string | null,"pagada"?: boolean,"pagada_en"?: string | null
+                  }
+                  Update: {
+                    "cliente_id"?: string,"concepto"?: string,"created_at"?: string,"fecha_emision"?: string,"fecha_vencimiento"?: string | null,"id"?: string,"importe"?: number,"numero"?: string,"obra_id"?: string | null,"pagada"?: boolean,"pagada_en"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "facturas_cliente_id_fkey"
+      columns: ["cliente_id"]
+isOneToOne: false
+      referencedRelation: "clientes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "facturas_obra_id_fkey"
+      columns: ["obra_id"]
+isOneToOne: false
+      referencedRelation: "obras"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"movimientos": {
+                  Row: {
+                    "concepto": string,"created_at": string,"factura_id": string | null,"fecha": string,"id": string,"importe": number,"obra_id": string | null,"tipo": Database["public"]['Enums']["tipo_movimiento"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "concepto": string,"created_at"?: string,"factura_id"?: string | null,"fecha": string,"id"?: string,"importe": number,"obra_id"?: string | null,"tipo": Database["public"]['Enums']["tipo_movimiento"]
+                  }
+                  Update: {
+                    "concepto"?: string,"created_at"?: string,"factura_id"?: string | null,"fecha"?: string,"id"?: string,"importe"?: number,"obra_id"?: string | null,"tipo"?: Database["public"]['Enums']["tipo_movimiento"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "movimientos_factura_id_fkey"
+      columns: ["factura_id"]
+isOneToOne: true
+      referencedRelation: "facturas"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "movimientos_obra_id_fkey"
+      columns: ["obra_id"]
+isOneToOne: false
+      referencedRelation: "obras"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"obra_trabajadores": {
                   Row: {
                     "obra_id": string,"user_id": string
@@ -218,6 +270,9 @@ isOneToOne: false
             "cambiar_estado_obra":
 { Args: { "p_estado": Database["public"]['Enums']["estado_obra"],"p_obra": string }; Returns: undefined
                            },
+"marcar_factura":
+{ Args: { "p_factura": string,"p_fecha": string,"p_pagada": boolean }; Returns: undefined
+                           },
 "marcar_preparado":
 { Args: { "p_item": string,"p_preparado": boolean }; Returns: undefined
                            },
@@ -234,7 +289,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_checklist": "material"|"herramienta","tipo_evento": "cita"|"fecha_limite","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
+            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_checklist": "material"|"herramienta","tipo_evento": "cita"|"fecha_limite","tipo_movimiento": "ingreso"|"gasto","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -354,7 +409,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_checklist": ["material", "herramienta"],"tipo_evento": ["cita", "fecha_limite"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
+            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_checklist": ["material", "herramienta"],"tipo_evento": ["cita", "fecha_limite"],"tipo_movimiento": ["ingreso", "gasto"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
           }
         }
 } as const
