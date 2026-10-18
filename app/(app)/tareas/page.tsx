@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { ListaTareas } from "./ListaTareas";
 
 export const metadata = { title: "Tareas" };
-const SELECT_TAREA = "id, titulo, fecha_limite, hecha, obras (titulo), profiles (nombre)";
+const SELECT_TAREA = "id, titulo, notas, fecha_limite, hecha, obras (titulo), profiles (nombre)";
 
 export default function TareasPage({ searchParams }: PageProps<"/tareas">) {
   return (

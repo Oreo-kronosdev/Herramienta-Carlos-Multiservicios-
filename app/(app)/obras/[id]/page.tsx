@@ -139,7 +139,7 @@ async function TareasObra({ obraId, esJefe }: { obraId: string; esJefe: boolean 
   const supabase = await createClient();
   const { data: tareas } = await supabase
     .from("tareas")
-    .select("id, titulo, fecha_limite, hecha, obras (titulo), profiles (nombre)")
+    .select("id, titulo, notas, fecha_limite, hecha, obras (titulo), profiles (nombre)")
     .eq("obra_id", obraId)
     .eq("hecha", false)
     .order("fecha_limite", { nullsFirst: false });

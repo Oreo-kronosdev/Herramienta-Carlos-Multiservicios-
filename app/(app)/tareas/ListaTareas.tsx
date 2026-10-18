@@ -6,6 +6,7 @@ import { MarcarTarea } from "./MarcarTarea";
 export type TareaLista = {
   id: string;
   titulo: string;
+  notas: string | null;
   fecha_limite: string | null;
   hecha: boolean;
   obras: { titulo: string } | null;
@@ -22,6 +23,7 @@ export function ListaTareas({ tareas, hoy, esJefe }: { tareas: TareaLista[]; hoy
           <>
             <span className={`block font-semibold break-words ${t.hecha ? "text-muted line-through" : ""}`}>{t.titulo}</span>
             {detalle ? <span className="block text-[15px] break-words text-muted">{detalle}</span> : null}
+            {t.notas ? <span className="mt-0.5 block text-[15px] break-words whitespace-pre-line">{t.notas}</span> : null}
             {t.fecha_limite ? (
               <span className={`mt-0.5 flex flex-wrap items-center gap-1.5 text-[15px] ${estado === "vencida" ? "font-semibold text-danger" : "text-muted"}`}>
                 {estado === "vencida" ? <span className="rounded-full bg-danger-soft px-2 py-0.5 text-[13px]">Vencida</span> : null}

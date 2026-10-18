@@ -99,7 +99,7 @@ async function MisTareas({ perfil }: { perfil: Profile }) {
   const supabase = await createClient();
   const { data: tareas } = await supabase
     .from("tareas")
-    .select("id, titulo, fecha_limite, hecha, obras (titulo), profiles (nombre)")
+    .select("id, titulo, notas, fecha_limite, hecha, obras (titulo), profiles (nombre)")
     .eq("asignada_a", perfil.id)
     .eq("hecha", false)
     .order("fecha_limite", { nullsFirst: false })

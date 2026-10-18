@@ -32,7 +32,7 @@ async function Editar({ params }: { params: Promise<{ id: string }> }) {
     <>
       <Cabecera titulo="Editar tarea" volver={{ href: "/tareas", texto: "Tareas" }} />
       <Fresco>
-        <TareaForm tarea={t} {...await datosFormularioTarea(t.obra_id)} />
+        <TareaForm tarea={t} {...await datosFormularioTarea(t.obra_id, t.asignada_a)} />
         <div className="mt-8">
           <BorrarTarea id={t.id} />
         </div>

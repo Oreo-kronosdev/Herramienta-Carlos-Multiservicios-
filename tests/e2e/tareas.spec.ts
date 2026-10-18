@@ -73,3 +73,67 @@ test("el jefe borra la tarea", async ({ page }) => {
   await page.goto("/tareas?hechas=1");
   await expect(fila(page, `${titulo} (2 tubos)`)).toHaveCount(0);
 });
+
+test.describe("detalles", () => {
+  const admin = async () => {
+    const { createClient } = await import("@supabase/supabase-js");
+    return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: { persistSession: false },
+    });
+  };
+
+  test("el trabajador lee las notas de su tarea", async ({ page }) => {
+    const db = await admin();
+    const { data: t } = await db
+      .from("tareas")
+      .insert({ titulo: "Tarea con notas", notas: "Transparente, 2 tubos", asignada_a: "a0000000-0000-0000-0000-000000000002" })
+      .select("id")
+      .single();
+    try {
+      await entrar(page, "pepe", USUARIOS.pepe);
+      await page.goto("/tareas");
+      await expect(fila(page, "Tarea con notas")).toContainText("Transparente, 2 tubos");
+    } finally {
+      await db.from("tareas").delete().eq("id", t!.id);
+    }
+  });
+
+  test("editar la tarea de alguien desactivado no le quita la tarea", async ({ page }) => {
+    const db = await admin();
+    const { crearTrabajador } = await import("./helpers");
+    const baja = await crearTrabajador("baja");
+    const { data: t } = await db.from("tareas").insert({ titulo: "Tarea de baja", asignada_a: baja.id }).select("id").single();
+    await db.from("profiles").update({ activo: false }).eq("id", baja.id);
+    try {
+      await entrar(page, "carlos", USUARIOS.carlos);
+      await page.goto(`/tareas/${t!.id}/editar`);
+      await page.getByLabel("Qué hay que hacer").filter({ visible: true }).fill("Tarea de baja (revisada)");
+      await page.getByRole("button", { name: "Guardar tarea" }).click();
+      await expect(page).toHaveURL(/\/tareas$/);
+      const { data } = await db.from("tareas").select("asignada_a, titulo").eq("id", t!.id).single();
+      expect(data).toEqual({ asignada_a: baja.id, titulo: "Tarea de baja (revisada)" });
+    } finally {
+      await db.from("tareas").delete().eq("id", t!.id);
+    }
+  });
+
+  test("si no se puede guardar la marca, se ve el error", async ({ page }) => {
+    const db = await admin();
+    const { data: t } = await db
+      .from("tareas")
+      .insert({ titulo: "Tarea sin cobertura", asignada_a: "a0000000-0000-0000-0000-000000000002" })
+      .select("id")
+      .single();
+    try {
+      await entrar(page, "pepe", USUARIOS.pepe);
+      await page.goto("/tareas");
+      // Simula que se cae la conexión justo al guardar
+      await page.route("**/tareas", (r) => (r.request().method() === "POST" ? r.abort() : r.continue()));
+      await fila(page, "Tarea sin cobertura").getByRole("checkbox").check();
+      await expect(fila(page, "Tarea sin cobertura")).toContainText("No se pudo guardar");
+      await expect(fila(page, "Tarea sin cobertura").getByRole("checkbox")).not.toBeChecked();
+    } finally {
+      await db.from("tareas").delete().eq("id", t!.id);
+    }
+  });
+});
