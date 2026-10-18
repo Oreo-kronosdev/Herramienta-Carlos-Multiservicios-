@@ -46,3 +46,9 @@ insert into public.eventos (id, titulo, tipo, fecha, hora, obra_id, avisar_dias)
 insert into public.evento_personas (evento_id, user_id) values
   ('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002'),
   ('d0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003');
+
+-- Tareas
+insert into public.tareas (id, titulo, fecha_limite, obra_id, asignada_a) values
+  ('e0000000-0000-0000-0000-000000000001', 'Llevar la escalera grande', current_date + 1, 'c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002'),
+  ('e0000000-0000-0000-0000-000000000002', 'Mandar fotos del tiro de la chimenea', current_date - 1, 'c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002'),
+  ('e0000000-0000-0000-0000-000000000003', 'Comprar pintura de fachada', null, 'c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003');
