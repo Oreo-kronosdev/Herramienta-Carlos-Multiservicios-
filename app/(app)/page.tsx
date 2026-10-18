@@ -9,6 +9,7 @@ import { ListaObras } from "./obras/ListaObras";
 import { ListaEventos } from "./agenda/ListaEventos";
 import { hoyMadrid, sumarDias } from "@/lib/fechas";
 import { ListaTareas } from "./tareas/ListaTareas";
+import { formatEUR } from "@/lib/importe";
 
 export default function InicioPage() {
   return (
@@ -35,10 +36,21 @@ async function Inicio() {
 
 async function ResumenJefe() {
   const supabase = await createClient();
-  const { data } = await supabase.from("obras").select("estado");
+  const [{ data }, { data: pendientes }] = await Promise.all([
+    supabase.from("obras").select("estado"),
+    supabase.from("facturas").select("importe").eq("pagada", false),
+  ]);
   const cuenta = (e: EstadoObra) => (data ?? []).filter((o) => o.estado === e).length;
+  const porCobrar = (pendientes ?? []).reduce((s, f) => s + Math.round(Number(f.importe) * 100), 0) / 100;
   return (
     <>
+      <Link
+        href="/finanzas"
+        className="mb-7 flex min-h-16 items-center justify-between rounded-card border border-line bg-surface px-4 py-3 active:bg-bg"
+      >
+        <span className="text-[15px] font-semibold text-muted">Pendiente de cobro</span>
+        <span className="font-display text-2xl font-bold tabular-nums">{formatEUR(porCobrar)}</span>
+      </Link>
       <h2 className="mb-3 font-display text-xl font-bold">Obras por estado</h2>
       <div className="grid grid-cols-2 gap-2.5">
         {(Object.keys(ESTADOS_OBRA) as EstadoObra[]).map((e) => (
