@@ -23,7 +23,7 @@ export function ListaEventos({ eventos }: { eventos: EventoLista[] }) {
               <li key={e.id}>
                 <Link href={`/agenda/${e.id}`} className="flex min-h-16 items-center gap-3 px-4 py-3 active:bg-bg">
                   <span className="w-14 shrink-0 font-display text-lg font-bold tabular-nums">
-                    {formatHora(e.hora) ?? <span className="text-sm font-semibold text-muted">Todo el día</span>}
+                    {formatHora(e.hora) ?? <span className="block font-sans text-[13px] leading-tight font-semibold text-muted">Todo el día</span>}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold break-words">{e.titulo}</span>

@@ -35,21 +35,23 @@ test("marca como avisado, no repite y reintenta solo los que fallaron", async ({
     { evento_id: ev!.id, user_id: sinMovil.id },
     { evento_id: ev!.id, user_id: conFallo.id },
   ]);
-  const avisadoAt = async (user: string) =>
-    (await db.from("evento_personas").select("avisado_at").eq("evento_id", ev!.id).eq("user_id", user).single()).data!
-      .avisado_at;
+  try {
+    const avisadoAt = async (user: string) =>
+      (await db.from("evento_personas").select("avisado_at").eq("evento_id", ev!.id).eq("user_id", user).single()).data!
+        .avisado_at;
 
-  const r1 = await llamar(request, process.env.CRON_SECRET);
-  expect(r1.status()).toBe(200);
-  expect((await r1.json()).fallos).toBeGreaterThanOrEqual(1);
-  expect(await avisadoAt(sinMovil.id)).not.toBeNull();
-  expect(await avisadoAt(conFallo.id)).toBeNull(); // se reintentará mañana
+    const r1 = await llamar(request, process.env.CRON_SECRET);
+    expect(r1.status()).toBe(200);
+    expect((await r1.json()).fallos).toBeGreaterThanOrEqual(1);
+    expect(await avisadoAt(sinMovil.id)).not.toBeNull();
+    expect(await avisadoAt(conFallo.id)).toBeNull(); // se reintentará mañana
 
-  const marcado = await avisadoAt(sinMovil.id);
-  await llamar(request, process.env.CRON_SECRET);
-  expect(await avisadoAt(sinMovil.id)).toBe(marcado); // no se repite
-
-  await db.from("eventos").delete().eq("id", ev!.id);
+    const marcado = await avisadoAt(sinMovil.id);
+    await llamar(request, process.env.CRON_SECRET);
+    expect(await avisadoAt(sinMovil.id)).toBe(marcado); // no se repite
+  } finally {
+    await db.from("eventos").delete().eq("id", ev!.id);
+  }
 });
 
 test("si el navegador bloquea las notificaciones, se explica cómo activarlas", async ({ page }) => {

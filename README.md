@@ -1,6 +1,6 @@
 # Carlos Multiservicios — herramienta interna
 
-App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes y obras. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
+App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras y agenda con avisos en el móvil. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
 
 **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Supabase (Auth + Postgres con Row Level Security).
 
@@ -11,6 +11,8 @@ App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, client
 | Equipo (crear usuarios, roles, desactivar, contraseñas) | ✅ | — |
 | Clientes | ver y editar todos | ver los de sus obras |
 | Obras | ver, crear, editar, borrar y asignar | ver las suyas (con presupuesto) y cambiar su estado |
+| Agenda (citas y fechas límite) | ver, crear, editar y borrar todas | ver las que tiene asignadas |
+| Avisos en el móvil | sí | sí |
 
 La base de datos impone estos permisos (RLS), no solo las pantallas.
 
@@ -76,6 +78,8 @@ npm run lint && npm run build
    | `SUPABASE_SERVICE_ROLE_KEY` | clave secret |
 3. Despliega. En Supabase → **Authentication → URL Configuration** pon como *Site URL* la dirección de Vercel (p. ej. `https://carlos-multiservicios.vercel.app`).
 
+4. Variables para los avisos (ver «Avisos en el móvil» más abajo): `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` y `CRON_SECRET`.
+
 Cada push a `main` vuelve a desplegar. Si hay migraciones nuevas, ejecuta `npx supabase db push` antes.
 
 ---
@@ -102,6 +106,41 @@ En la ficha de cada persona el jefe puede cambiar el nombre, el rol o la contras
 
 ---
 
+## Avisos en el móvil
+
+Cada cita tiene un «Avisar» (el mismo día, 1, 2, 3 o 7 días antes). Una vez al día, Vercel llama a `/api/recordatorios`, que manda una notificación a las personas asignadas.
+
+**Configuración (una vez):**
+
+1. Genera las claves en tu ordenador:
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. En Vercel → Settings → Environment Variables añade:
+   | Variable | Valor |
+   |---|---|
+   | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | la *Public Key* |
+   | `VAPID_PRIVATE_KEY` | la *Private Key* (secreta) |
+   | `VAPID_SUBJECT` | `mailto:` + un email de contacto, p. ej. `mailto:carlos@ejemplo.com` |
+   | `CRON_SECRET` | una contraseña larga cualquiera (Vercel la usa para llamar al aviso diario) |
+3. Vuelve a desplegar. El horario está en `vercel.json` (`0 6 * * *`, en UTC): sale hacia las **8:00 en verano y las 7:00 en invierno**. En el plan gratuito de Vercel puede retrasarse hasta una hora.
+
+No cambies las claves VAPID una vez en uso: si las cambias, todos tendrán que volver a activar los avisos.
+
+**Cada persona, en su móvil:**
+
+- **Android (Chrome):** entra en **Agenda** → **Activar avisos en este móvil** → Permitir.
+- **iPhone (iOS 16.4 o posterior):** primero instala la app (ver abajo) y ábrela desde el icono de la pantalla de inicio. Después: **Agenda** → **Activar avisos en este móvil** → Permitir. En Safari, sin instalar, el iPhone no permite avisos.
+
+Si una cita cambia de fecha o de antelación, el aviso se vuelve a programar. Nadie recibe el mismo aviso dos veces. Las personas desactivadas y las citas ya pasadas no generan avisos.
+
+**Probarlo a mano** (por ejemplo, después de desplegar):
+```bash
+curl -H "Authorization: Bearer <CRON_SECRET>" https://<tu-app>.vercel.app/api/recordatorios
+# → {"avisados":1,"caducadas":0,"fallos":0}
+```
+Para ver una notificación al momento, crea una cita para hoy con «El mismo día», asígnatela y llama a esa URL.
+
 ## Instalar en el móvil
 
 - **iPhone (Safari):** abre la web → botón Compartir → **Añadir a pantalla de inicio**.
@@ -112,9 +151,11 @@ Se abre a pantalla completa como una app. Necesita conexión a internet; no func
 ## Estructura
 
 ```
-app/(app)/        pantallas con sesión: inicio, obras, clientes, equipo
+app/(app)/        pantallas con sesión: inicio, obras, agenda, clientes, equipo
+app/api/          aviso diario (lo llama Vercel Cron)
+public/sw.js      service worker: solo muestra notificaciones
 app/login/        entrada y salida
-lib/              validación (usuario, cliente, obra, importes), sesión, clientes de Supabase
+lib/              validación (usuario, cliente, obra, cita, importes), fechas en hora de Madrid, avisos, sesión
 supabase/         migraciones, datos de prueba y pruebas de seguridad (RLS)
 scripts/          alta de usuarios por terminal
 tests/            pruebas unitarias y de punta a punta
