@@ -1,6 +1,6 @@
 # Carlos Multiservicios — herramienta interna
 
-App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras y agenda con avisos en el móvil. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
+App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, clientes, obras, agenda con avisos en el móvil y tareas por persona. Pensada para el móvil y solo para uso interno. No hay registro público: los usuarios los crea el jefe.
 
 **Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Supabase (Auth + Postgres con Row Level Security).
 
@@ -12,6 +12,7 @@ App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, client
 | Clientes | ver y editar todos | ver los de sus obras |
 | Obras | ver, crear, editar, borrar y asignar | ver las suyas (con presupuesto) y cambiar su estado |
 | Agenda (citas y fechas límite) | ver, crear, editar y borrar todas | ver las que tiene asignadas |
+| Tareas | crear, asignar, editar y borrar | ver las suyas y marcarlas como hechas |
 | Avisos en el móvil | sí | sí |
 
 La base de datos impone estos permisos (RLS), no solo las pantallas.
@@ -151,7 +152,7 @@ Se abre a pantalla completa como una app. Necesita conexión a internet; no func
 ## Estructura
 
 ```
-app/(app)/        pantallas con sesión: inicio, obras, agenda, clientes, equipo
+app/(app)/        pantallas con sesión: inicio, obras, agenda, tareas, clientes, equipo
 app/api/          aviso diario (lo llama Vercel Cron)
 public/sw.js      service worker: solo muestra notificaciones
 app/login/        entrada y salida
