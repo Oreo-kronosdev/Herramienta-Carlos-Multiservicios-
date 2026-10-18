@@ -7,6 +7,7 @@ import { Cabecera } from "@/components/Cabecera";
 import { Cargando } from "@/components/Cargando";
 import { EmptyState } from "@/components/EmptyState";
 import { ListaEventos } from "./ListaEventos";
+import { ActivarAvisos } from "@/components/ActivarAvisos";
 
 export const metadata = { title: "Agenda" };
 
@@ -36,6 +37,7 @@ async function Agenda({ searchParams }: { searchParams: Promise<Record<string, s
         volver={pasadas ? { href: "/agenda", texto: "Agenda" } : undefined}
         accion={esJefe && !pasadas ? { href: "/agenda/nuevo", texto: "Nueva cita" } : undefined}
       />
+      {!pasadas ? <ActivarAvisos /> : null}
       {eventos?.length ? (
         <ListaEventos eventos={eventos} />
       ) : (
