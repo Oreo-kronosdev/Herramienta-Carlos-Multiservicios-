@@ -36,3 +36,6 @@ export const AVISAR_DIAS: Record<AvisarDias, string> = {
   3: "3 días antes",
   7: "1 semana antes",
 };
+
+export type TipoChecklist = Database["public"]["Enums"]["tipo_checklist"];
+export const TIPOS_CHECKLIST: Record<TipoChecklist, string> = { material: "Material", herramienta: "Herramientas" };

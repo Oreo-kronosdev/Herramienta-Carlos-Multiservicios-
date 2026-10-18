@@ -13,6 +13,7 @@ import { ListaEventos } from "../../agenda/ListaEventos";
 import { EmptyState } from "@/components/EmptyState";
 import { hoyMadrid } from "@/lib/fechas";
 import { ListaTareas } from "../../tareas/ListaTareas";
+import { Checklist } from "../checklist/Checklist";
 
 export const metadata = { title: "Obra" };
 
@@ -50,6 +51,8 @@ async function Obra({ params }: { params: Promise<{ id: string }> }) {
             <EstadoSelector id={o.id} estado={o.estado} />
           </Fresco>
         </section>
+
+        <Checklist obraId={o.id} esJefe={esJefe} />
 
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-card border border-line bg-surface p-4">
           <Dato titulo="Dirección" ancho>

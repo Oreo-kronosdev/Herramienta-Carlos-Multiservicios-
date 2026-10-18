@@ -23,7 +23,27 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "clientes": {
+            "checklist_items": {
+                  Row: {
+                    "created_at": string,"id": string,"obra_id": string,"preparado": boolean,"texto": string,"tipo": Database["public"]['Enums']["tipo_checklist"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"obra_id": string,"preparado"?: boolean,"texto": string,"tipo": Database["public"]['Enums']["tipo_checklist"]
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"obra_id"?: string,"preparado"?: boolean,"texto"?: string,"tipo"?: Database["public"]['Enums']["tipo_checklist"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "checklist_items_obra_id_fkey"
+      columns: ["obra_id"]
+isOneToOne: false
+      referencedRelation: "obras"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"clientes": {
                   Row: {
                     "administrador": string | null,"created_at": string,"direccion": string | null,"id": string,"nombre": string,"telefono": string | null
                   }
@@ -198,6 +218,9 @@ isOneToOne: false
             "cambiar_estado_obra":
 { Args: { "p_estado": Database["public"]['Enums']["estado_obra"],"p_obra": string }; Returns: undefined
                            },
+"marcar_preparado":
+{ Args: { "p_item": string,"p_preparado": boolean }; Returns: undefined
+                           },
 "marcar_tarea":
 { Args: { "p_hecha": boolean,"p_tarea": string }; Returns: undefined
                            },
@@ -205,10 +228,13 @@ isOneToOne: false
 { Args: { "p_hoy": string,"p_limite"?: number }; Returns: {
               "evento_id": string,"fecha": string,"hora": string,"titulo": string,"user_id": string
             }[]
+                           },
+"reiniciar_checklist":
+{ Args: { "p_obra": string }; Returns: undefined
                            }
           }
           Enums: {
-            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_evento": "cita"|"fecha_limite","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
+            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_checklist": "material"|"herramienta","tipo_evento": "cita"|"fecha_limite","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -328,7 +354,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_evento": ["cita", "fecha_limite"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
+            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_checklist": ["material", "herramienta"],"tipo_evento": ["cita", "fecha_limite"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
           }
         }
 } as const

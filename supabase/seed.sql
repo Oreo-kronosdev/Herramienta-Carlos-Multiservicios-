@@ -52,3 +52,10 @@ insert into public.tareas (id, titulo, fecha_limite, obra_id, asignada_a) values
   ('e0000000-0000-0000-0000-000000000001', 'Llevar la escalera grande', current_date + 1, 'c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002'),
   ('e0000000-0000-0000-0000-000000000002', 'Mandar fotos del tiro de la chimenea', current_date - 1, 'c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002'),
   ('e0000000-0000-0000-0000-000000000003', 'Comprar pintura de fachada', null, 'c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003');
+
+-- Checklist de la obra de canalones
+insert into public.checklist_items (obra_id, texto, tipo) values
+  ('c0000000-0000-0000-0000-000000000001', 'Silicona', 'material'),
+  ('c0000000-0000-0000-0000-000000000001', 'Guantes', 'material'),
+  ('c0000000-0000-0000-0000-000000000001', 'Escalera de 7 m', 'herramienta'),
+  ('c0000000-0000-0000-0000-000000000001', 'Arnés', 'herramienta');

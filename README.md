@@ -13,6 +13,7 @@ App web (PWA) para el jefe y los trabajadores: login por usuario, equipo, client
 | Obras | ver, crear, editar, borrar y asignar | ver las suyas (con presupuesto) y cambiar su estado |
 | Agenda (citas y fechas límite) | ver, crear, editar y borrar todas | ver las que tiene asignadas |
 | Tareas | crear, asignar, editar y borrar | ver las suyas y marcarlas como hechas |
+| Material y herramientas (en cada obra) | apuntar y quitar | marcar lo preparado y «Desmarcar todo» en sus obras |
 | Avisos en el móvil | sí | sí |
 
 La base de datos impone estos permisos (RLS), no solo las pantallas.
