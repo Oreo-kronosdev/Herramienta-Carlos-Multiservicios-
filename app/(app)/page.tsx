@@ -6,6 +6,8 @@ import { ESTADOS_OBRA, type EstadoObra } from "@/lib/etiquetas";
 import { Cargando } from "@/components/Cargando";
 import { EmptyState } from "@/components/EmptyState";
 import { ListaObras } from "./obras/ListaObras";
+import { ListaEventos } from "./agenda/ListaEventos";
+import { hoyMadrid, sumarDias } from "@/lib/fechas";
 
 export default function InicioPage() {
   return (
@@ -21,7 +23,8 @@ async function Inicio() {
     <section>
       <h1 className="font-display text-3xl font-bold">Inicio</h1>
       <p className="mt-1 mb-5 text-muted">Hola, {perfil.nombre}.</p>
-      {perfil.rol === "jefe" ? <ResumenJefe /> : <MisObras perfil={perfil} />}
+      <Proximos />
+      <div className="mt-7">{perfil.rol === "jefe" ? <ResumenJefe /> : <MisObras perfil={perfil} />}</div>
     </section>
   );
 }
@@ -66,6 +69,24 @@ async function MisObras({ perfil }: { perfil: Profile }) {
           {perfil.nombre}, no tienes obras abiertas ahora mismo.
         </EmptyState>
       )}
+    </>
+  );
+}
+
+async function Proximos() {
+  const hoy = hoyMadrid();
+  const supabase = await createClient();
+  const { data: eventos } = await supabase
+    .from("eventos")
+    .select("id, titulo, tipo, fecha, hora, obras (titulo)")
+    .gte("fecha", hoy)
+    .lte("fecha", sumarDias(hoy, 6))
+    .order("fecha")
+    .order("hora", { nullsFirst: true });
+  return (
+    <>
+      <h2 className="mb-3 font-display text-xl font-bold">Próximos 7 días</h2>
+      {eventos?.length ? <ListaEventos eventos={eventos} /> : <EmptyState titulo="Nada esta semana" />}
     </>
   );
 }

@@ -37,6 +37,52 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"evento_personas": {
+                  Row: {
+                    "avisado_at": string | null,"evento_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "avisado_at"?: string | null,"evento_id": string,"user_id": string
+                  }
+                  Update: {
+                    "avisado_at"?: string | null,"evento_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "evento_personas_evento_id_fkey"
+      columns: ["evento_id"]
+isOneToOne: false
+      referencedRelation: "eventos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "evento_personas_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"eventos": {
+                  Row: {
+                    "avisar_dias": number,"created_at": string,"fecha": string,"fecha_aviso": string | null,"hora": string | null,"id": string,"notas": string | null,"obra_id": string | null,"tipo": Database["public"]['Enums']["tipo_evento"],"titulo": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "avisar_dias"?: number,"created_at"?: string,"fecha": string,"fecha_aviso"?: never,"hora"?: string | null,"id"?: string,"notas"?: string | null,"obra_id"?: string | null,"tipo"?: Database["public"]['Enums']["tipo_evento"],"titulo": string
+                  }
+                  Update: {
+                    "avisar_dias"?: number,"created_at"?: string,"fecha"?: string,"fecha_aviso"?: never,"hora"?: string | null,"id"?: string,"notas"?: string | null,"obra_id"?: string | null,"tipo"?: Database["public"]['Enums']["tipo_evento"],"titulo"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "eventos_obra_id_fkey"
+      columns: ["obra_id"]
+isOneToOne: false
+      referencedRelation: "obras"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"obra_trabajadores": {
                   Row: {
                     "obra_id": string,"user_id": string
@@ -97,6 +143,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"push_suscripciones": {
+                  Row: {
+                    "auth": string,"created_at": string,"endpoint": string,"id": string,"p256dh": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "auth": string,"created_at"?: string,"endpoint": string,"id"?: string,"p256dh": string,"user_id": string
+                  }
+                  Update: {
+                    "auth"?: string,"created_at"?: string,"endpoint"?: string,"id"?: string,"p256dh"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "push_suscripciones_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -105,10 +171,15 @@ isOneToOne: false
           Functions: {
             "cambiar_estado_obra":
 { Args: { "p_estado": Database["public"]['Enums']["estado_obra"],"p_obra": string }; Returns: undefined
+                           },
+"reclamar_avisos":
+{ Args: { "p_hoy": string,"p_limite"?: number }; Returns: {
+              "evento_id": string,"fecha": string,"hora": string,"titulo": string,"user_id": string
+            }[]
                            }
           }
           Enums: {
-            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
+            "estado_obra": "pendiente"|"presupuestada"|"en_curso"|"terminada"|"cancelada","rol_usuario": "jefe"|"trabajador","tipo_evento": "cita"|"fecha_limite","tipo_trabajo": "reparacion"|"tejado"|"canalones"|"chimenea"|"pintura"|"trabajo_altura"|"otro"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -228,7 +299,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
+            "estado_obra": ["pendiente", "presupuestada", "en_curso", "terminada", "cancelada"],"rol_usuario": ["jefe", "trabajador"],"tipo_evento": ["cita", "fecha_limite"],"tipo_trabajo": ["reparacion", "tejado", "canalones", "chimenea", "pintura", "trabajo_altura", "otro"]
           }
         }
 } as const

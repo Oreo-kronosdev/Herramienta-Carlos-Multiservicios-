@@ -9,6 +9,9 @@ import { Cabecera } from "@/components/Cabecera";
 import { Cargando } from "@/components/Cargando";
 import { Fresco } from "@/components/Fresco";
 import { EstadoSelector } from "../EstadoSelector";
+import { ListaEventos } from "../../agenda/ListaEventos";
+import { EmptyState } from "@/components/EmptyState";
+import { hoyMadrid } from "@/lib/fechas";
 
 export const metadata = { title: "Obra" };
 
@@ -81,9 +84,33 @@ async function Obra({ params }: { params: Promise<{ id: string }> }) {
             </Dato>
           ) : null}
         </dl>
+
+        <section>
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <h2 className="font-display text-xl font-bold">Agenda de esta obra</h2>
+            {esJefe ? (
+              <Link href={`/agenda/nuevo?obra=${o.id}`} className="flex h-10 items-center rounded-[10px] border-2 border-line px-3 text-[15px] font-semibold active:bg-bg">
+                Nueva cita
+              </Link>
+            ) : null}
+          </div>
+          <AgendaObra obraId={o.id} />
+        </section>
       </div>
     </>
   );
+}
+
+async function AgendaObra({ obraId }: { obraId: string }) {
+  const supabase = await createClient();
+  const { data: eventos } = await supabase
+    .from("eventos")
+    .select("id, titulo, tipo, fecha, hora, obras (titulo)")
+    .eq("obra_id", obraId)
+    .gte("fecha", hoyMadrid())
+    .order("fecha")
+    .order("hora", { nullsFirst: true });
+  return eventos?.length ? <ListaEventos eventos={eventos} /> : <EmptyState titulo="Sin citas próximas" />;
 }
 
 function Dato({ titulo, ancho, children }: { titulo: string; ancho?: boolean; children: React.ReactNode }) {

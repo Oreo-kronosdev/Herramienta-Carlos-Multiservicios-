@@ -6,6 +6,9 @@ const RUTAS_JEFE = [
   "/obras",
   "/obras/nuevo",
   "/obras/c0000000-0000-0000-0000-000000000001",
+  "/agenda",
+  "/agenda/nuevo",
+  "/agenda/d0000000-0000-0000-0000-000000000001",
   "/clientes",
   "/clientes/nuevo",
   "/clientes/b0000000-0000-0000-0000-000000000001",
@@ -30,7 +33,7 @@ async function revisarPantalla(page: Page, ruta: string) {
 test("jefe: navegación inferior con Equipo y pantallas sin desbordes", async ({ page }) => {
   await entrar(page, "carlos", USUARIOS.carlos);
   const nav = page.getByRole("navigation", { name: "Principal" });
-  for (const n of ["Inicio", "Obras", "Clientes", "Equipo"]) await expect(nav.getByRole("link", { name: n })).toBeVisible();
+  for (const n of ["Inicio", "Obras", "Agenda", "Clientes", "Equipo"]) await expect(nav.getByRole("link", { name: n })).toBeVisible();
   for (const ruta of RUTAS_JEFE) await revisarPantalla(page, ruta);
 
   await nav.getByRole("link", { name: "Clientes" }).click();
@@ -42,8 +45,9 @@ test("trabajador: navegación sin Equipo", async ({ page }) => {
   await entrar(page, "pepe", USUARIOS.pepe);
   const nav = page.getByRole("navigation", { name: "Principal" });
   await expect(nav.getByRole("link", { name: "Obras" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Agenda" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Equipo" })).toHaveCount(0);
-  for (const ruta of ["/", "/obras", "/clientes", "/obras/c0000000-0000-0000-0000-000000000001"]) await revisarPantalla(page, ruta);
+  for (const ruta of ["/", "/obras", "/agenda", "/clientes", "/obras/c0000000-0000-0000-0000-000000000001"]) await revisarPantalla(page, ruta);
 });
 
 test("todos los estilos :hover están protegidos para pantallas táctiles", async ({ page }) => {

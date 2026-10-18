@@ -38,3 +38,11 @@ insert into public.obra_trabajadores (obra_id, user_id) values
   ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002'),
   ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002'),
   ('c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003');
+
+-- Agenda (fechas relativas al día en que se carga el seed)
+insert into public.eventos (id, titulo, tipo, fecha, hora, obra_id, avisar_dias) values
+  ('d0000000-0000-0000-0000-000000000001', 'Revisar bajantes con el presidente', 'cita', current_date + 1, '09:30', 'c0000000-0000-0000-0000-000000000001', 1),
+  ('d0000000-0000-0000-0000-000000000002', 'Entregar presupuesto de fachada', 'fecha_limite', current_date + 3, null, 'c0000000-0000-0000-0000-000000000003', 2);
+insert into public.evento_personas (evento_id, user_id) values
+  ('d0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002'),
+  ('d0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000003');

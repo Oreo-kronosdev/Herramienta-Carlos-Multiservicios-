@@ -26,3 +26,9 @@ test("buscadores no indexan la app", async ({ request }) => {
   const res = await request.get("/robots.txt");
   expect(await res.text()).toMatch(/Disallow: \/\s*$/m);
 });
+
+test("el service worker de avisos se sirve sin sesión", async ({ request }) => {
+  const res = await request.get("/sw.js", { maxRedirects: 0 });
+  expect(res.status()).toBe(200);
+  expect(await res.text()).toContain("showNotification");
+});

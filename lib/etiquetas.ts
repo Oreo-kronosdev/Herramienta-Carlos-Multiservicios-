@@ -23,3 +23,16 @@ export const ESTADOS_OBRA: Record<EstadoObra, string> = {
   terminada: "Terminada",
   cancelada: "Cancelada",
 };
+
+export type TipoEvento = Database["public"]["Enums"]["tipo_evento"];
+export type AvisarDias = 0 | 1 | 2 | 3 | 7;
+
+export const TIPOS_EVENTO: Record<TipoEvento, string> = { cita: "Cita", fecha_limite: "Fecha límite" };
+
+export const AVISAR_DIAS: Record<AvisarDias, string> = {
+  0: "El mismo día",
+  1: "1 día antes",
+  2: "2 días antes",
+  3: "3 días antes",
+  7: "1 semana antes",
+};
