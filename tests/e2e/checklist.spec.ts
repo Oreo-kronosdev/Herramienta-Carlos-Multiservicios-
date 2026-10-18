@@ -14,6 +14,15 @@ const leer = async (page: Page) => {
 };
 let total = 0;
 
+// Cada ejecución empieza con la lista de la obra sin marcar (por si una ejecución anterior se cortó).
+test.beforeAll(async () => {
+  const { createClient } = await import("@supabase/supabase-js");
+  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
+  await db.from("checklist_items").update({ preparado: false }).eq("obra_id", OBRA.split("/").pop()!);
+});
+
 test("el jefe añade material y herramientas", async ({ page }) => {
   await entrar(page, "carlos", USUARIOS.carlos);
   await page.goto(OBRA);
@@ -49,6 +58,7 @@ test("Pepe marca lo que lleva y lo desmarca todo para la próxima salida", async
 });
 
 test("el jefe quita elementos", async ({ page }) => {
+  page.on("dialog", (d) => d.accept()); // «¿Quitar … de la lista?»
   await entrar(page, "carlos", USUARIOS.carlos);
   await page.goto(OBRA);
   await lista(page).getByRole("button", { name: `Quitar ${andamio}` }).click();
@@ -62,4 +72,29 @@ test("un texto vacío da error", async ({ page }) => {
   await page.goto(OBRA);
   await lista(page).getByRole("button", { name: "Añadir" }).click();
   await expect(lista(page).getByText("Escribe qué hace falta")).toBeVisible();
+});
+
+test("sin conexión, «Desmarcar todo» avisa y la página sigue funcionando", async ({ page }) => {
+  await entrar(page, "pepe", USUARIOS.pepe);
+  await page.goto(OBRA);
+  await lista(page).getByRole("checkbox", { name: "Guantes" }).check();
+  await expect(progreso(page)).toHaveText(/^1 de/);
+  await page.route(OBRA, (r) => (r.request().method() === "POST" ? r.abort() : r.continue()));
+  page.once("dialog", (d) => d.accept());
+  await lista(page).getByRole("button", { name: "Desmarcar todo" }).click();
+  await expect(lista(page).getByRole("alert")).toContainText("No se pudo");
+  await expect(page.getByRole("heading", { name: "Limpieza de canalones" })).toBeVisible();
+  await page.unroute(OBRA);
+  await lista(page).getByRole("checkbox", { name: "Guantes" }).uncheck();
+  await expect(progreso(page)).toHaveText(/^0 de/);
+});
+
+test("sin conexión, «Quitar» avisa y no borra", async ({ page }) => {
+  await entrar(page, "carlos", USUARIOS.carlos);
+  await page.goto(OBRA);
+  await page.route(OBRA, (r) => (r.request().method() === "POST" ? r.abort() : r.continue()));
+  page.once("dialog", (d) => d.accept());
+  await lista(page).getByRole("button", { name: "Quitar Arnés" }).click();
+  await expect(lista(page).getByRole("alert")).toContainText("No se pudo");
+  await expect(lista(page)).toContainText("Arnés");
 });

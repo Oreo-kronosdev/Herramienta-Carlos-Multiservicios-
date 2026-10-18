@@ -41,18 +41,38 @@ export function ItemCheck({ id, texto, preparado, obraId }: { id: string; texto:
   );
 }
 
+// Ejecuta una acción del servidor y devuelve un mensaje si falla (también sin conexión).
+async function intentar(accion: () => Promise<{ error?: string }>, mensaje: string): Promise<string | null> {
+  try {
+    return (await accion()).error ? mensaje : null;
+  } catch {
+    return `${mensaje} (¿sin conexión?)`;
+  }
+}
+
 export function QuitarItem({ id, texto, obraId }: { id: string; texto: string; obraId: string }) {
   const [pendiente, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   return (
-    <button
-      type="button"
-      aria-label={`Quitar ${texto}`}
-      disabled={pendiente}
-      onClick={() => startTransition(async () => void (await borrarItem(id, obraId)))}
-      className="flex size-11 shrink-0 items-center justify-center rounded-lg text-xl text-muted active:bg-bg disabled:opacity-40"
-    >
-      ×
-    </button>
+    <>
+      {error ? (
+        <span role="alert" className="shrink-0 text-[13px] font-semibold text-danger">
+          {error}
+        </span>
+      ) : null}
+      <button
+        type="button"
+        aria-label={`Quitar ${texto}`}
+        disabled={pendiente}
+        onClick={() => {
+          if (!confirm(`¿Quitar «${texto}» de la lista?`)) return;
+          startTransition(async () => setError(await intentar(() => borrarItem(id, obraId), "No se pudo quitar")));
+        }}
+        className="flex size-11 shrink-0 items-center justify-center rounded-lg text-xl text-muted active:bg-bg disabled:opacity-40"
+      >
+        ×
+      </button>
+    </>
   );
 }
 
@@ -83,16 +103,25 @@ export function NuevoItem({ obraId }: { obraId: string }) {
 
 export function DesmarcarTodo({ obraId }: { obraId: string }) {
   const [pendiente, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   return (
-    <button
-      type="button"
-      disabled={pendiente}
-      onClick={() => {
-        if (confirm("¿Desmarcar todo para la próxima salida?")) startTransition(async () => void (await reiniciarChecklist(obraId)));
-      }}
-      className="h-10 shrink-0 rounded-[10px] border-2 border-line px-3 text-[15px] font-semibold whitespace-nowrap active:bg-bg disabled:opacity-50"
-    >
-      Desmarcar todo
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        disabled={pendiente}
+        onClick={() => {
+          if (!confirm("¿Desmarcar todo para la próxima salida?")) return;
+          startTransition(async () => setError(await intentar(() => reiniciarChecklist(obraId), "No se pudo desmarcar")));
+        }}
+        className="h-10 shrink-0 rounded-[10px] border-2 border-line px-3 text-[15px] font-semibold whitespace-nowrap active:bg-bg disabled:opacity-50"
+      >
+        Desmarcar todo
+      </button>
+      {error ? (
+        <span role="alert" className="text-[13px] font-semibold text-danger">
+          {error}
+        </span>
+      ) : null}
+    </div>
   );
 }

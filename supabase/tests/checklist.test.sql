@@ -1,7 +1,7 @@
 -- RLS del checklist de material y herramientas por obra.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(13);
+select plan(18);
 
 insert into auth.users (id, email, aud, role) values
   ('14000000-0000-0000-0000-000000000001', 't5-j@usuarios.local', 'authenticated', 'authenticated'),
@@ -34,6 +34,8 @@ update public.checklist_items set texto = 'hack' where id = '44000000-0000-0000-
 select is((select texto from t_items where id = '44000000-0000-0000-0000-000000000001'), 'Silicona', 'A no cambia el texto');
 select throws_ok($$insert into public.checklist_items (obra_id, texto, tipo) values ('34000000-0000-0000-0000-000000000001', 'x', 'material')$$,
   '42501', null, 'A no añade elementos');
+delete from public.checklist_items where id = '44000000-0000-0000-0000-000000000002';
+select is((select count(*) from t_items where id = '44000000-0000-0000-0000-000000000002'), 1::bigint, 'A no borra elementos');
 select lives_ok($$select public.reiniciar_checklist('34000000-0000-0000-0000-000000000001')$$, 'A reinicia su obra');
 select is((select count(*) from t_items where obra_id = '34000000-0000-0000-0000-000000000001' and preparado), 0::bigint, 'todo desmarcado en O1');
 select throws_ok($$select public.reiniciar_checklist('34000000-0000-0000-0000-000000000002')$$,
@@ -45,9 +47,17 @@ update public.profiles set activo = false where id = '14000000-0000-0000-0000-00
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"14000000-0000-0000-0000-00000000000a","role":"authenticated"}';
 select is((select count(*) from t_items), 0::bigint, 'A desactivado no ve nada');
+select throws_ok($$select public.marcar_preparado('44000000-0000-0000-0000-000000000001', true)$$,
+  'P0001', 'No autorizado', 'A desactivado no marca');
+select throws_ok($$select public.reiniciar_checklist('34000000-0000-0000-0000-000000000001')$$,
+  'P0001', 'No autorizado', 'A desactivado no reinicia');
 
 set local request.jwt.claims = '{"sub":"14000000-0000-0000-0000-000000000001","role":"authenticated"}';
 select is((select count(*) from t_items), 3::bigint, 'J ve todo');
+select lives_ok($$insert into public.checklist_items (id, obra_id, texto, tipo)
+  values ('44000000-0000-0000-0000-000000000009', '34000000-0000-0000-0000-000000000002', 'Cinta', 'material')$$, 'J añade');
+delete from public.checklist_items where id = '44000000-0000-0000-0000-000000000009';
+select is((select count(*) from t_items where id = '44000000-0000-0000-0000-000000000009'), 0::bigint, 'J borra');
 
 set local role anon;
 select throws_ok($$select count(*) from public.checklist_items$$, '42501', null, 'anon no accede');
