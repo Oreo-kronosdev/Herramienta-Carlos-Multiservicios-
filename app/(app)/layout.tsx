@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
 import { signOut } from "@/app/login/actions";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
@@ -33,6 +34,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-[calc(var(--nav-h)+env(safe-area-inset-bottom)+1.5rem)]">
         {children}
       </main>
+      <BottomNav esJefe={perfil.rol === "jefe"} />
     </div>
   );
 }

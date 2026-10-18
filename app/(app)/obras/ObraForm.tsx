@@ -39,7 +39,7 @@ export function ObraForm({ obra, clientes, trabajadores }: Props) {
   }
 
   return (
-    <form action={action} className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {obra ? <input type="hidden" name="id" value={obra.id} /> : null}
       <Select
@@ -109,7 +109,7 @@ export function ObraForm({ obra, clientes, trabajadores }: Props) {
 export function BorrarObra({ id }: { id: string }) {
   const [state, action] = useActionState<FormState, FormData>(borrarObra, {});
   return (
-    <form
+    <form noValidate
       action={action}
       onSubmit={(ev) => {
         if (!confirm("¿Borrar esta obra? No se puede deshacer.")) ev.preventDefault();

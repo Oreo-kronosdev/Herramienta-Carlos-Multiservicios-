@@ -19,7 +19,7 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
   const [state, action] = useActionState<FormState, FormData>(guardarCliente, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {cliente ? <input type="hidden" name="id" value={cliente.id} /> : null}
       <Field
@@ -55,7 +55,7 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
 export function BorrarCliente({ id }: { id: string }) {
   const [state, action] = useActionState<FormState, FormData>(borrarCliente, {});
   return (
-    <form
+    <form noValidate
       action={action}
       onSubmit={(ev) => {
         if (!confirm("¿Borrar este cliente? No se puede deshacer.")) ev.preventDefault();

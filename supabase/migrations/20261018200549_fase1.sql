@@ -73,6 +73,10 @@ alter table public.clientes enable row level security;
 alter table public.obras enable row level security;
 alter table public.obra_trabajadores enable row level security;
 revoke all on public.profiles, public.clientes, public.obras, public.obra_trabajadores from anon;
+-- Explícito: en proyectos nuevos de Supabase las tablas pueden no estar expuestas por defecto a la API.
+-- Qué filas ve cada uno lo deciden las políticas de abajo.
+grant select, insert, update, delete
+  on public.profiles, public.clientes, public.obras, public.obra_trabajadores to authenticated;
 
 -- profiles: cada uno ve el suyo; el jefe ve todos. Altas y cambios solo por servidor (service role).
 create policy "perfil propio o jefe" on public.profiles

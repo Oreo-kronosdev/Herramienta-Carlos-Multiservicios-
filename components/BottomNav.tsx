@@ -1,0 +1,46 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const ICONOS = {
+  inicio: "M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5",
+  obras: "M4 20V9l8-5 8 5v11M9 20v-6h6v6",
+  clientes: "M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M20 19v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.15a3.5 3.5 0 0 1 0 6.7",
+  equipo: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M5 20a7 7 0 0 1 14 0",
+} as const;
+
+const ENLACES = [
+  { href: "/", texto: "Inicio", icono: "inicio" },
+  { href: "/obras", texto: "Obras", icono: "obras" },
+  { href: "/clientes", texto: "Clientes", icono: "clientes" },
+  { href: "/equipo", texto: "Equipo", icono: "equipo", soloJefe: true },
+] as const;
+
+export function BottomNav({ esJefe }: { esJefe: boolean }) {
+  const path = usePathname();
+  const activo = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+  return (
+    <nav
+      aria-label="Principal"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+    >
+      <ul className="mx-auto flex h-(--nav-h) max-w-2xl">
+        {ENLACES.filter((e) => esJefe || !("soloJefe" in e)).map((e) => (
+          <li key={e.href} className="flex-1">
+            <Link
+              href={e.href}
+              aria-current={activo(e.href) ? "page" : undefined}
+              className="flex h-full flex-col items-center justify-center gap-0.5 text-[13px] font-semibold text-muted transition-colors active:bg-bg aria-[current=page]:text-accent"
+            >
+              <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={ICONOS[e.icono]} />
+              </svg>
+              {e.texto}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}

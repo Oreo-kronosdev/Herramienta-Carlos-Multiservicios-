@@ -14,7 +14,7 @@ export function EditarUsuarioForm({ usuario }: { usuario: Usuario }) {
   const [state, action] = useActionState<FormState, FormData>(actualizarUsuario, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <h2 className="font-display text-xl font-bold">Datos y permisos</h2>
       <Aviso ok={state.ok} error={state.error} />
       <input type="hidden" name="id" value={usuario.id} />
@@ -33,7 +33,7 @@ export function EditarUsuarioForm({ usuario }: { usuario: Usuario }) {
 export function PasswordForm({ id }: { id: string }) {
   const [state, action] = useActionState<FormState, FormData>(cambiarPassword, {});
   return (
-    <form action={action} className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <h2 className="font-display text-xl font-bold">Contraseña</h2>
       <Aviso ok={state.ok} error={state.error} />
       <input type="hidden" name="id" value={id} />

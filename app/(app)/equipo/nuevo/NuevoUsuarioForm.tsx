@@ -12,7 +12,7 @@ export function NuevoUsuarioForm() {
   const [state, action] = useActionState<FormState, FormData>(crearUsuario, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       <Field
         label="Usuario"
