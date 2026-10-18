@@ -12,6 +12,7 @@ import { EstadoSelector } from "../EstadoSelector";
 import { ListaEventos } from "../../agenda/ListaEventos";
 import { EmptyState } from "@/components/EmptyState";
 import { hoyMadrid } from "@/lib/fechas";
+import { ListaTareas } from "../../tareas/ListaTareas";
 
 export const metadata = { title: "Obra" };
 
@@ -96,6 +97,18 @@ async function Obra({ params }: { params: Promise<{ id: string }> }) {
           </div>
           <AgendaObra obraId={o.id} />
         </section>
+
+        <section>
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <h2 className="font-display text-xl font-bold">Tareas de esta obra</h2>
+            {esJefe ? (
+              <Link href={`/tareas/nueva?obra=${o.id}`} className="flex h-10 items-center rounded-[10px] border-2 border-line px-3 text-[15px] font-semibold active:bg-bg">
+                Nueva tarea
+              </Link>
+            ) : null}
+          </div>
+          <TareasObra obraId={o.id} esJefe={esJefe} />
+        </section>
       </div>
     </>
   );
@@ -119,5 +132,20 @@ function Dato({ titulo, ancho, children }: { titulo: string; ancho?: boolean; ch
       <dt className="text-sm font-semibold text-muted">{titulo}</dt>
       <dd className="break-words">{children || <span className="text-muted">—</span>}</dd>
     </div>
+  );
+}
+
+async function TareasObra({ obraId, esJefe }: { obraId: string; esJefe: boolean }) {
+  const supabase = await createClient();
+  const { data: tareas } = await supabase
+    .from("tareas")
+    .select("id, titulo, notas, fecha_limite, hecha, obras (titulo), profiles (nombre)")
+    .eq("obra_id", obraId)
+    .eq("hecha", false)
+    .order("fecha_limite", { nullsFirst: false });
+  return tareas?.length ? (
+    <ListaTareas tareas={tareas} hoy={hoyMadrid()} esJefe={esJefe} />
+  ) : (
+    <EmptyState titulo="Sin tareas pendientes" />
   );
 }

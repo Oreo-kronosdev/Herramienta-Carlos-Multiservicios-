@@ -163,6 +163,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"tareas": {
+                  Row: {
+                    "asignada_a": string,"created_at": string,"fecha_limite": string | null,"hecha": boolean,"hecha_at": string | null,"id": string,"notas": string | null,"obra_id": string | null,"titulo": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "asignada_a": string,"created_at"?: string,"fecha_limite"?: string | null,"hecha"?: boolean,"hecha_at"?: string | null,"id"?: string,"notas"?: string | null,"obra_id"?: string | null,"titulo": string
+                  }
+                  Update: {
+                    "asignada_a"?: string,"created_at"?: string,"fecha_limite"?: string | null,"hecha"?: boolean,"hecha_at"?: string | null,"id"?: string,"notas"?: string | null,"obra_id"?: string | null,"titulo"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tareas_asignada_a_fkey"
+      columns: ["asignada_a"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tareas_obra_id_fkey"
+      columns: ["obra_id"]
+isOneToOne: false
+      referencedRelation: "obras"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -171,6 +197,9 @@ isOneToOne: false
           Functions: {
             "cambiar_estado_obra":
 { Args: { "p_estado": Database["public"]['Enums']["estado_obra"],"p_obra": string }; Returns: undefined
+                           },
+"marcar_tarea":
+{ Args: { "p_hecha": boolean,"p_tarea": string }; Returns: undefined
                            },
 "reclamar_avisos":
 { Args: { "p_hoy": string,"p_limite"?: number }; Returns: {

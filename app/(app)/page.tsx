@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { ListaObras } from "./obras/ListaObras";
 import { ListaEventos } from "./agenda/ListaEventos";
 import { hoyMadrid, sumarDias } from "@/lib/fechas";
+import { ListaTareas } from "./tareas/ListaTareas";
 
 export default function InicioPage() {
   return (
@@ -23,7 +24,10 @@ async function Inicio() {
     <section>
       <h1 className="font-display text-3xl font-bold">Inicio</h1>
       <p className="mt-1 mb-5 text-muted">Hola, {perfil.nombre}.</p>
-      <Proximos />
+      <MisTareas perfil={perfil} />
+      <div className="mt-7">
+        <Proximos />
+      </div>
       <div className="mt-7">{perfil.rol === "jefe" ? <ResumenJefe /> : <MisObras perfil={perfil} />}</div>
     </section>
   );
@@ -87,6 +91,24 @@ async function Proximos() {
     <>
       <h2 className="mb-3 font-display text-xl font-bold">Próximos 7 días</h2>
       {eventos?.length ? <ListaEventos eventos={eventos} /> : <EmptyState titulo="Nada esta semana" />}
+    </>
+  );
+}
+
+async function MisTareas({ perfil }: { perfil: Profile }) {
+  const supabase = await createClient();
+  const { data: tareas } = await supabase
+    .from("tareas")
+    .select("id, titulo, notas, fecha_limite, hecha, obras (titulo), profiles (nombre)")
+    .eq("asignada_a", perfil.id)
+    .eq("hecha", false)
+    .order("fecha_limite", { nullsFirst: false })
+    .limit(5);
+  if (!tareas?.length) return null;
+  return (
+    <>
+      <h2 className="mb-3 font-display text-xl font-bold">Mis tareas</h2>
+      <ListaTareas tareas={tareas} hoy={hoyMadrid()} esJefe={perfil.rol === "jefe"} />
     </>
   );
 }
