@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
-import { signOut } from "@/app/login/actions";
 import { BottomNav } from "@/components/BottomNav";
+import { BotonSalir } from "@/components/BotonSalir";
+import { SincronizarAvisos } from "@/components/SincronizarAvisos";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
@@ -20,21 +21,17 @@ async function Shell({ children }: { children: React.ReactNode }) {
           <span className="font-display text-lg font-bold tracking-wide">
             Multiservicios
           </span>
-          <form action={signOut} className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <span className="text-[15px] text-white/70">{perfil.nombre}</span>
-            <button
-              type="submit"
-              className="h-10 rounded-lg px-3 text-[15px] font-semibold text-white/90 active:bg-white/10"
-            >
-              Salir
-            </button>
-          </form>
+            <BotonSalir />
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-[calc(var(--nav-h)+env(safe-area-inset-bottom)+1.5rem)]">
         {children}
       </main>
       <BottomNav esJefe={perfil.rol === "jefe"} />
+      <SincronizarAvisos />
     </div>
   );
 }

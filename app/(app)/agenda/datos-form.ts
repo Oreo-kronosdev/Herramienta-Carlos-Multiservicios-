@@ -1,14 +1,15 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
-// Obras (con quién trabaja en cada una) y personas activas para el formulario de cita (solo jefe).
-export async function datosFormularioEvento() {
+// Obras abiertas (con quién trabaja en cada una) y personas activas para el formulario de cita (solo jefe).
+// `obraActual` se incluye aunque esté terminada, para que editar la cita no la desvincule.
+export async function datosFormularioEvento(obraActual?: string | null) {
   const supabase = await createClient();
   const [{ data: obras }, { data: personas }] = await Promise.all([
     supabase
       .from("obras")
       .select("id, titulo, obra_trabajadores (user_id)")
-      .not("estado", "in", "(terminada,cancelada)")
+      .or(`estado.not.in.(terminada,cancelada)${obraActual ? `,id.eq.${obraActual}` : ""}`)
       .order("titulo"),
     supabase.from("profiles").select("id, nombre").eq("activo", true).order("nombre"),
   ]);

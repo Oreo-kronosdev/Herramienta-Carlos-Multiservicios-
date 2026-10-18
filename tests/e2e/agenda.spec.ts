@@ -78,3 +78,35 @@ test("el jefe borra la cita", async ({ page }) => {
   await expect(page).toHaveURL(/\/agenda$/);
   await expect(page.getByRole("link", { name: new RegExp(titulo) })).toHaveCount(0);
 });
+
+test("editar una cita de una obra terminada no la desvincula de la obra", async ({ page }) => {
+  const { createClient } = await import("@supabase/supabase-js");
+  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
+  const { data: cliente } = await db.from("clientes").insert({ nombre: "Cliente obra terminada" }).select("id").single();
+  const { data: obra } = await db
+    .from("obras")
+    .insert({ cliente_id: cliente!.id, titulo: "Obra ya terminada", direccion: "C/ Fin 1", tipo_trabajo: "otro", estado: "terminada" })
+    .select("id")
+    .single();
+  const { data: ev } = await db
+    .from("eventos")
+    .insert({ titulo: "Revisión final", fecha: manana, obra_id: obra!.id })
+    .select("id")
+    .single();
+  await db.from("evento_personas").insert({ evento_id: ev!.id, user_id: "a0000000-0000-0000-0000-000000000002" });
+  try {
+    await entrar(page, "carlos", USUARIOS.carlos);
+    await page.goto(`/agenda/${ev!.id}/editar`);
+    await page.getByLabel("Título").filter({ visible: true }).fill("Revisión final (corregida)");
+    await page.getByRole("button", { name: "Guardar cita" }).click();
+    await expect(page.getByRole("heading", { name: "Revisión final (corregida)" })).toBeVisible();
+    const { data } = await db.from("eventos").select("obra_id").eq("id", ev!.id).single();
+    expect(data!.obra_id).toBe(obra!.id);
+  } finally {
+    await db.from("eventos").delete().eq("id", ev!.id);
+    await db.from("obras").delete().eq("id", obra!.id);
+    await db.from("clientes").delete().eq("id", cliente!.id);
+  }
+});

@@ -23,15 +23,13 @@ async function Editar({ params }: { params: Promise<{ id: string }> }) {
   await requireJefe();
   const { id } = await params;
   const supabase = await createClient();
-  const [{ data: e }, datos] = await Promise.all([
-    supabase
-      .from("eventos")
-      .select("id, titulo, tipo, fecha, hora, obra_id, notas, avisar_dias, evento_personas (user_id)")
-      .eq("id", id)
-      .maybeSingle(),
-    datosFormularioEvento(),
-  ]);
+  const { data: e } = await supabase
+    .from("eventos")
+    .select("id, titulo, tipo, fecha, hora, obra_id, notas, avisar_dias, evento_personas (user_id)")
+    .eq("id", id)
+    .maybeSingle();
   if (!e) notFound();
+  const datos = await datosFormularioEvento(e.obra_id);
   const { evento_personas, ...evento } = e;
   return (
     <>

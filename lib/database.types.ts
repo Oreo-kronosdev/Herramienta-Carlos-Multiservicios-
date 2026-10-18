@@ -171,6 +171,11 @@ isOneToOne: false
           Functions: {
             "cambiar_estado_obra":
 { Args: { "p_estado": Database["public"]['Enums']["estado_obra"],"p_obra": string }; Returns: undefined
+                           },
+"reclamar_avisos":
+{ Args: { "p_hoy": string,"p_limite"?: number }; Returns: {
+              "evento_id": string,"fecha": string,"hora": string,"titulo": string,"user_id": string
+            }[]
                            }
           }
           Enums: {

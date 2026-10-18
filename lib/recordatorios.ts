@@ -60,3 +60,39 @@ export async function enviarAvisos(
   }
   return { avisados, caducadas: [...new Set(caducadas)], fallos };
 }
+
+type Clave = { evento_id: string; user_id: string };
+
+// Lote a lote: las filas llegan ya reservadas (marcadas); se liberan las que no se pudieron entregar.
+export async function procesarAvisos(o: {
+  hoy: string;
+  limite: number;
+  reclamar: (limite: number) => Promise<Pendiente[]>;
+  cargarSubs: (usuarios: string[]) => Promise<Map<string, Sub[]>>;
+  liberar: (filas: Clave[]) => Promise<void>;
+  borrarCaducadas: (endpoints: string[]) => Promise<void>;
+  enviar: (sub: Sub, payload: Payload) => Promise<void>;
+}) {
+  const total = { avisados: 0, caducadas: 0, fallos: 0 };
+  for (;;) {
+    const lote = await o.reclamar(o.limite);
+    if (!lote.length) break;
+    let subs: Map<string, Sub[]>;
+    try {
+      subs = await o.cargarSubs([...new Set(lote.map((p) => p.user_id))]);
+    } catch (e) {
+      await o.liberar(lote);
+      throw e;
+    }
+    const r = await enviarAvisos(elegirAvisos(lote, o.hoy), subs, o.enviar, o.hoy);
+    const ok = new Set(r.avisados.map((a) => `${a.evento_id}|${a.user_id}`));
+    const pendientes = lote.filter((p) => !ok.has(`${p.evento_id}|${p.user_id}`));
+    if (pendientes.length) await o.liberar(pendientes);
+    if (r.caducadas.length) await o.borrarCaducadas(r.caducadas);
+    total.avisados += r.avisados.length;
+    total.caducadas += r.caducadas.length;
+    total.fallos += r.fallos;
+    if (lote.length < o.limite) break;
+  }
+  return total;
+}

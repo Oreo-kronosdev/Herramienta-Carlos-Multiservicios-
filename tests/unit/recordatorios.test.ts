@@ -70,3 +70,50 @@ describe("enviarAvisos", () => {
     expect(r.fallos).toBe(0);
   });
 });
+
+import { procesarAvisos } from "@/lib/recordatorios";
+
+describe("procesarAvisos (reservar → enviar → liberar fallidos)", () => {
+  const pend = (user_id: string, evento_id = "e1"): Pendiente => p({ user_id, evento_id });
+  const sub = (endpoint: string): Sub => ({ endpoint, p256dh: "k", auth: "a" });
+
+  test("si no se pueden leer las suscripciones, libera todo y falla (no da nada por avisado)", async () => {
+    const liberadas: string[] = [];
+    await expect(
+      procesarAvisos({
+        hoy: "2026-10-19",
+        limite: 10,
+        reclamar: async () => [pend("pepe"), pend("ana")],
+        cargarSubs: async () => {
+          throw new Error("PostgREST caído");
+        },
+        liberar: async (filas) => void liberadas.push(...filas.map((f) => f.user_id)),
+        borrarCaducadas: async () => {},
+        enviar: async () => {},
+      }),
+    ).rejects.toThrow("PostgREST caído");
+    expect(liberadas.sort()).toEqual(["ana", "pepe"]);
+  });
+
+  test("libera solo a quien falló y repite mientras haya lotes llenos", async () => {
+    const lotes = [[pend("pepe", "e1"), pend("ana", "e1")], [pend("luis", "e2")]];
+    const liberadas: string[] = [];
+    const borradas: string[] = [];
+    const r = await procesarAvisos({
+      hoy: "2026-10-19",
+      limite: 2,
+      reclamar: async () => lotes.shift() ?? [],
+      cargarSubs: async (usuarios) =>
+        new Map(usuarios.map((u) => [u, [sub(u === "ana" ? "ana-roto" : u === "luis" ? "luis-viejo" : `${u}-ok`)]])),
+      liberar: async (filas) => void liberadas.push(...filas.map((f) => f.user_id)),
+      borrarCaducadas: async (e) => void borradas.push(...e),
+      enviar: async (s) => {
+        if (s.endpoint === "ana-roto") throw Object.assign(new Error("500"), { statusCode: 500 });
+        if (s.endpoint === "luis-viejo") throw Object.assign(new Error("gone"), { statusCode: 410 });
+      },
+    });
+    expect(r).toEqual({ avisados: 2, caducadas: 1, fallos: 1 });
+    expect(liberadas).toEqual(["ana"]);
+    expect(borradas).toEqual(["luis-viejo"]);
+  });
+});
