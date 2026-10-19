@@ -117,7 +117,7 @@ test.describe("detalles", () => {
     }
   });
 
-  test("si no se puede guardar la marca, se ve el error", async ({ page }) => {
+  test("si se cae la conexión al marcar, se guarda al volver", async ({ page }) => {
     const db = await admin();
     const { data: t } = await db
       .from("tareas")
@@ -130,8 +130,10 @@ test.describe("detalles", () => {
       // Simula que se cae la conexión justo al guardar
       await page.route("**/tareas", (r) => (r.request().method() === "POST" ? r.abort() : r.continue()));
       await fila(page, "Tarea sin cobertura").getByRole("checkbox").check();
-      await expect(fila(page, "Tarea sin cobertura")).toContainText("No se pudo guardar");
-      await expect(fila(page, "Tarea sin cobertura").getByRole("checkbox")).not.toBeChecked();
+      await page.waitForTimeout(1500);
+      await expect(fila(page, "Tarea sin cobertura")).not.toContainText("No se pudo guardar");
+      await page.unroute("**/tareas");
+      await expect.poll(async () => (await db.from("tareas").select("hecha").eq("id", t!.id).single()).data?.hecha).toBe(true);
     } finally {
       await db.from("tareas").delete().eq("id", t!.id);
     }

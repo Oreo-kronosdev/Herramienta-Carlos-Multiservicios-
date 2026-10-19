@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useOffline } from "next/offline";
 import { Field } from "@/components/Field";
 import { Select } from "@/components/Select";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -10,6 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { comprimirFoto, FotoIlegible, validarFoto } from "@/lib/imagen";
 import { UNIDADES } from "@/lib/etiquetas";
 import type { FormState } from "@/app/(app)/equipo/actions";
+import { Formulario } from "@/components/Formulario";
 import {
   anadirLinea,
   borrarPresupuesto,
@@ -24,18 +26,18 @@ import {
 export function NuevoPresupuesto({ obraId }: { obraId: string }) {
   const [state, action] = useActionState<FormState, FormData>(crearPresupuesto, {});
   return (
-    <form action={action}>
+    <Formulario estado={state} action={action}>
       <input type="hidden" name="obra_id" value={obraId} />
       <SubmitButton pendingText="Creando…">Nueva toma de datos</SubmitButton>
       {state.error ? <div className="mt-2"><Aviso error={state.error} /></div> : null}
-    </form>
+    </Formulario>
   );
 }
 
 export function DatosForm({ id, titulo, observaciones }: { id: string; titulo: string; observaciones: string | null }) {
   const [state, action] = useActionState<FormState, FormData>(guardarDatos, {});
   return (
-    <form action={action} noValidate className="space-y-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4">
       <Aviso ok={state.ok} error={state.error} />
       <input type="hidden" name="id" value={id} />
       <Field label="Título" name="titulo" defaultValue={titulo} error={state.errores?.titulo} />
@@ -50,7 +52,7 @@ export function DatosForm({ id, titulo, observaciones }: { id: string; titulo: s
         />
       </label>
       <SubmitButton>Guardar datos</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 
@@ -59,7 +61,7 @@ export function LineaForm({ presupuestoId, tipo }: { presupuestoId: string; tipo
   const e = state.errores ?? {};
   const campo = tipo === "medida" ? "concepto" : "material";
   return (
-    <form action={action} noValidate className="mt-3 space-y-3 border-t border-line pt-3">
+    <Formulario estado={state} action={action} noValidate className="mt-3 space-y-3 border-t border-line pt-3">
       <Aviso error={state.error} />
       <input type="hidden" name="presupuesto_id" value={presupuestoId} />
       <input type="hidden" name="tipo" value={tipo} />
@@ -69,7 +71,7 @@ export function LineaForm({ presupuestoId, tipo }: { presupuestoId: string; tipo
         <Select label="Unidad" name="unidad" opciones={UNIDADES} defaultValue={tipo === "medida" ? "ml" : "ud"} error={e.unidad} />
       </div>
       <SubmitButton pendingText="Añadiendo…">{tipo === "medida" ? "Añadir medida" : "Añadir material"}</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 
@@ -109,9 +111,12 @@ export function SubirFotos({ presupuestoId, quedan }: { presupuestoId: string; q
   const router = useRouter();
   const [estado, setEstado] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const sinRed = useOffline();
 
   async function subir(files: File[]) {
     setError(null);
+    // Las fotos no esperan a la señal: van directas a Storage, fuera de las acciones de Next
+    if (sinRed || !navigator.onLine) return setError("Sin conexión. Sube las fotos cuando vuelva la señal.");
     if (files.length > quedan) return setError(`Solo caben ${quedan} fotos más (máximo 20)`);
     const malo = files.map(validarFoto).find(Boolean);
     if (malo) return setError(malo);
@@ -172,7 +177,7 @@ export function Foto({ id, presupuestoId, url, pie }: { id: string; presupuestoI
       ) : (
         <div className="flex aspect-[4/3] items-center justify-center bg-bg text-muted">Sin vista previa</div>
       )}
-      <form action={action} noValidate className="space-y-2 p-3">
+      <Formulario estado={state} action={action} noValidate className="space-y-2 p-3">
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="presupuesto_id" value={presupuestoId} />
         <Field label="Pie de foto" name="pie" defaultValue={pie ?? ""} />
@@ -191,7 +196,7 @@ export function Foto({ id, presupuestoId, url, pie }: { id: string; presupuestoI
         </div>
         {state.ok ? <p role="status" className="text-[13px] font-semibold text-ok">Guardado</p> : null}
         {state.error || error ? <p role="alert" className="text-[13px] font-semibold text-danger">{state.error ?? error}</p> : null}
-      </form>
+      </Formulario>
     </li>
   );
 }

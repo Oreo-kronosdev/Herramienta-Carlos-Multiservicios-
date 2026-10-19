@@ -8,6 +8,7 @@ import { Aviso } from "@/components/Aviso";
 import { AVISAR_DIAS, TIPOS_EVENTO, type AvisarDias, type TipoEvento } from "@/lib/etiquetas";
 import type { FormState } from "@/app/(app)/equipo/actions";
 import { borrarEvento, guardarEvento } from "./actions";
+import { Formulario } from "@/components/Formulario";
 
 type Evento = {
   id: string;
@@ -43,7 +44,7 @@ export function EventoForm({ evento, obraInicial, obras, personas }: Props) {
     setMarcadas((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id]));
 
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {evento ? <input type="hidden" name="id" value={evento.id} /> : null}
       <Field label="Título" name="titulo" defaultValue={evento?.titulo} error={e.titulo} hint="Ej.: Visita con el presidente" required />
@@ -110,7 +111,7 @@ export function EventoForm({ evento, obraInicial, obras, personas }: Props) {
         />
       </label>
       <SubmitButton>Guardar cita</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 

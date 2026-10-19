@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Aviso } from "@/components/Aviso";
 import type { FormState } from "@/app/(app)/equipo/actions";
 import { borrarTarea, guardarTarea } from "./actions";
+import { Formulario } from "@/components/Formulario";
 
 type Tarea = { id: string; titulo: string; notas: string | null; fecha_limite: string | null; obra_id: string | null; asignada_a: string };
 type Props = {
@@ -20,7 +21,7 @@ export function TareaForm({ tarea, obraInicial, obras, personas }: Props) {
   const [state, action] = useActionState<FormState, FormData>(guardarTarea, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {tarea ? <input type="hidden" name="id" value={tarea.id} /> : null}
       <Field label="Qué hay que hacer" name="titulo" defaultValue={tarea?.titulo} error={e.titulo} hint="Ej.: Comprar silicona" required />
@@ -50,7 +51,7 @@ export function TareaForm({ tarea, obraInicial, obras, personas }: Props) {
         />
       </label>
       <SubmitButton>Guardar tarea</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 

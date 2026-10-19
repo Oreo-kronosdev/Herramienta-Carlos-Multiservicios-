@@ -7,6 +7,7 @@ import { Aviso } from "@/components/Aviso";
 import { TIPOS_CHECKLIST } from "@/lib/etiquetas";
 import type { FormState } from "@/app/(app)/equipo/actions";
 import { anadirItem, borrarItem, marcarItem, reiniciarChecklist } from "./actions";
+import { Formulario } from "@/components/Formulario";
 
 export function ItemCheck({ id, texto, preparado, obraId }: { id: string; texto: string; preparado: boolean; obraId: string }) {
   const [optimista, setOptimista] = useOptimistic(preparado);
@@ -80,7 +81,7 @@ export function NuevoItem({ obraId }: { obraId: string }) {
   const [state, action] = useActionState<FormState, FormData>(anadirItem, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} noValidate className="space-y-3 border-t border-line pt-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-3 border-t border-line pt-4">
       <Aviso error={state.error} />
       <input type="hidden" name="obra_id" value={obraId} />
       <Field label="Qué hace falta" name="texto" error={e.texto} maxLength={120} enterKeyHint="done" />
@@ -97,7 +98,7 @@ export function NuevoItem({ obraId }: { obraId: string }) {
         ))}
       </fieldset>
       <SubmitButton pendingText="Añadiendo…">Añadir</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Field } from "@/components/Field";
 import { SubmitButton } from "@/components/SubmitButton";
 import { signIn, type LoginState } from "./actions";
+import { Formulario } from "@/components/Formulario";
 
 export function LoginForm() {
   const aviso =
@@ -12,7 +13,7 @@ export function LoginForm() {
   const [state, action] = useActionState<LoginState, FormData>(signIn, {});
   const mensaje = state.error ?? aviso;
   return (
-    <form action={action} noValidate className="space-y-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4">
       {mensaje ? (
         <p role="alert" className="rounded-[10px] bg-danger-soft px-3.5 py-3 font-medium text-danger">
           {mensaje}
@@ -40,6 +41,6 @@ export function LoginForm() {
       <div className="pt-2">
         <SubmitButton pendingText="Entrando…">Entrar</SubmitButton>
       </div>
-    </form>
+    </Formulario>
   );
 }

@@ -8,6 +8,7 @@ import { Aviso } from "@/components/Aviso";
 import { ESTADOS_OBRA, TIPOS_TRABAJO, type EstadoObra, type TipoTrabajo } from "@/lib/etiquetas";
 import type { FormState } from "@/app/(app)/equipo/actions";
 import { borrarObra, guardarObra } from "./actions";
+import { Formulario } from "@/components/Formulario";
 
 type Obra = {
   id: string;
@@ -39,7 +40,7 @@ export function ObraForm({ obra, clientes, trabajadores }: Props) {
   }
 
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {obra ? <input type="hidden" name="id" value={obra.id} /> : null}
       <Select
@@ -102,7 +103,7 @@ export function ObraForm({ obra, clientes, trabajadores }: Props) {
         )}
       </fieldset>
       <SubmitButton>Guardar obra</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 

@@ -8,6 +8,7 @@ import { Aviso } from "@/components/Aviso";
 import type { TipoMovimiento } from "@/lib/etiquetas";
 import type { FormState } from "@/app/(app)/equipo/actions";
 import { borrarFactura, borrarMovimiento, guardarFactura, guardarMovimiento, marcarFactura } from "./actions";
+import { Formulario } from "@/components/Formulario";
 
 const aTexto = (n: number | null | undefined) => (n == null ? "" : n.toFixed(2).replace(".", ","));
 const opciones = <T extends { id: string }>(xs: T[], k: keyof T) => Object.fromEntries(xs.map((x) => [x.id, String(x[k])]));
@@ -28,7 +29,7 @@ export function MovimientoForm({
   const [state, action] = useActionState<FormState, FormData>(guardarMovimiento, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {movimiento ? <input type="hidden" name="id" value={movimiento.id} /> : null}
       <input type="hidden" name="tipo" value={movimiento?.tipo ?? tipo} />
@@ -37,7 +38,7 @@ export function MovimientoForm({
       <Field label="Fecha" name="fecha" type="date" defaultValue={movimiento?.fecha ?? hoy} error={e.fecha} required />
       <Select label="Obra" name="obra_id" opciones={opciones(obras, "titulo")} vacia="Sin obra" defaultValue={movimiento?.obra_id ?? ""} />
       <SubmitButton>Guardar</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 
@@ -66,7 +67,7 @@ export function FacturaForm({
   const [state, action] = useActionState<FormState, FormData>(guardarFactura, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       {factura ? <input type="hidden" name="id" value={factura.id} /> : null}
       <Field label="Número" name="numero" defaultValue={factura?.numero} error={e.numero} hint="Ej.: 2026-014" autoCapitalize="characters" required />
@@ -79,7 +80,7 @@ export function FacturaForm({
         <Field label="Vence el" name="fecha_vencimiento" type="date" defaultValue={factura?.fecha_vencimiento ?? ""} error={e.fecha_vencimiento} hint="Opcional" />
       </div>
       <SubmitButton>Guardar factura</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 

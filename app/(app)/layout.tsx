@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { BottomNav } from "@/components/BottomNav";
 import { BotonSalir } from "@/components/BotonSalir";
 import { SincronizarAvisos } from "@/components/SincronizarAvisos";
+import { SinConexion } from "@/components/SinConexion";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
@@ -26,6 +27,7 @@ async function Shell({ children }: { children: React.ReactNode }) {
             <BotonSalir />
           </div>
         </div>
+        <SinConexion />
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-5 pb-[calc(var(--nav-h)+env(safe-area-inset-bottom)+1.5rem)] print:max-w-none print:p-0">
         {children}

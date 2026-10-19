@@ -74,7 +74,7 @@ test("un texto vacío da error", async ({ page }) => {
   await expect(lista(page).getByText("Escribe qué hace falta")).toBeVisible();
 });
 
-test("sin conexión, «Desmarcar todo» avisa y la página sigue funcionando", async ({ page }) => {
+test("sin conexión, «Desmarcar todo» espera y se guarda al volver la señal", async ({ page }) => {
   await entrar(page, "pepe", USUARIOS.pepe);
   await page.goto(OBRA);
   await lista(page).getByRole("checkbox", { name: "Guantes" }).check();
@@ -82,19 +82,22 @@ test("sin conexión, «Desmarcar todo» avisa y la página sigue funcionando", a
   await page.route(OBRA, (r) => (r.request().method() === "POST" ? r.abort() : r.continue()));
   page.once("dialog", (d) => d.accept());
   await lista(page).getByRole("button", { name: "Desmarcar todo" }).click();
-  await expect(lista(page).getByRole("alert")).toContainText("No se pudo");
-  await expect(page.getByRole("heading", { name: "Limpieza de canalones" })).toBeVisible();
+  await page.waitForTimeout(1500);
+  await expect(lista(page).getByRole("alert")).toHaveCount(0);
   await page.unroute(OBRA);
-  await lista(page).getByRole("checkbox", { name: "Guantes" }).uncheck();
+  await expect(progreso(page)).toHaveText(/^0 de/);
+  await page.reload();
   await expect(progreso(page)).toHaveText(/^0 de/);
 });
 
-test("sin conexión, «Quitar» avisa y no borra", async ({ page }) => {
+test("sin conexión, «Quitar» espera y borra al volver la señal", async ({ page }) => {
   await entrar(page, "carlos", USUARIOS.carlos);
   await page.goto(OBRA);
   await page.route(OBRA, (r) => (r.request().method() === "POST" ? r.abort() : r.continue()));
   page.once("dialog", (d) => d.accept());
   await lista(page).getByRole("button", { name: "Quitar Arnés" }).click();
-  await expect(lista(page).getByRole("alert")).toContainText("No se pudo");
-  await expect(lista(page)).toContainText("Arnés");
+  await page.waitForTimeout(1500);
+  await expect(lista(page).getByRole("alert")).toHaveCount(0);
+  await page.unroute(OBRA);
+  await expect(lista(page)).not.toContainText("Arnés");
 });

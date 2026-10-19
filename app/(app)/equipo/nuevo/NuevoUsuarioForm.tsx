@@ -7,12 +7,13 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Aviso } from "@/components/Aviso";
 import { ROLES } from "@/lib/etiquetas";
 import { crearUsuario, type FormState } from "../actions";
+import { Formulario } from "@/components/Formulario";
 
 export function NuevoUsuarioForm() {
   const [state, action] = useActionState<FormState, FormData>(crearUsuario, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <Aviso error={state.error} />
       <Field
         label="Usuario"
@@ -39,6 +40,6 @@ export function NuevoUsuarioForm() {
       />
       <Select label="Rol" name="rol" opciones={ROLES} defaultValue="trabajador" error={e.rol} />
       <SubmitButton pendingText="Creando…">Crear usuario</SubmitButton>
-    </form>
+    </Formulario>
   );
 }

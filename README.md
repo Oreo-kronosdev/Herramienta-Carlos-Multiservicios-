@@ -167,6 +167,21 @@ curl -H "Authorization: Bearer <CRON_SECRET>" https://<tu-app>.vercel.app/api/re
 ```
 Para ver una notificación al momento, crea una cita para hoy con «El mismo día», asígnatela y llama a esa URL.
 
+## Sin conexión
+
+Pensado para cortes de cobertura con la app abierta (sótanos, tejados):
+
+- Arriba sale «Sin conexión. Lo que guardes se enviará al recuperarla.».
+- Lo que se guarde mientras tanto (formularios, marcar tareas o material) se queda esperando. El botón dice «Sin conexión · se enviará al volver», y al volver la señal se envía solo, una sola vez. Lo hace Next.js (`experimental.useOffline` en `next.config.ts`).
+- Si se intenta cerrar la app con algo pendiente, el navegador pregunta antes.
+- **Límites:**
+  - Si se cierra la app sin señal, lo pendiente se pierde.
+  - Sin conexión no se abren pantallas que no estén ya cargadas.
+  - El login necesita conexión.
+  - Las fotos de presupuesto no esperan: hay que subirlas con señal.
+
+Si al guardar falta un campo obligatorio o el servidor da un error, el formulario conserva todo lo escrito y el cursor va al campo marcado en rojo (`components/Formulario.tsx`).
+
 ## Instalar en el móvil
 
 - **iPhone (Safari):** abre la web → botón Compartir → **Añadir a pantalla de inicio**.

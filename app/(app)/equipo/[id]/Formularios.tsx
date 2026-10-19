@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Aviso } from "@/components/Aviso";
 import { ROLES, type Rol } from "@/lib/etiquetas";
 import { actualizarUsuario, cambiarPassword, type FormState } from "../actions";
+import { Formulario } from "@/components/Formulario";
 
 type Usuario = { id: string; nombre: string; rol: Rol; activo: boolean };
 
@@ -14,7 +15,7 @@ export function EditarUsuarioForm({ usuario }: { usuario: Usuario }) {
   const [state, action] = useActionState<FormState, FormData>(actualizarUsuario, {});
   const e = state.errores ?? {};
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <h2 className="font-display text-xl font-bold">Datos y permisos</h2>
       <Aviso ok={state.ok} error={state.error} />
       <input type="hidden" name="id" value={usuario.id} />
@@ -26,14 +27,14 @@ export function EditarUsuarioForm({ usuario }: { usuario: Usuario }) {
         <span className="ml-auto text-right text-sm text-muted">Si lo quitas, no podrá entrar</span>
       </label>
       <SubmitButton>Guardar cambios</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
 
 export function PasswordForm({ id }: { id: string }) {
   const [state, action] = useActionState<FormState, FormData>(cambiarPassword, {});
   return (
-    <form action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
+    <Formulario estado={state} action={action} noValidate className="space-y-4 rounded-card border border-line bg-surface p-4">
       <h2 className="font-display text-xl font-bold">Contraseña</h2>
       <Aviso ok={state.ok} error={state.error} />
       <input type="hidden" name="id" value={id} />
@@ -50,6 +51,6 @@ export function PasswordForm({ id }: { id: string }) {
         required
       />
       <SubmitButton pendingText="Cambiando…">Cambiar contraseña</SubmitButton>
-    </form>
+    </Formulario>
   );
 }
